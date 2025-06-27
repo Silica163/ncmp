@@ -1,0 +1,75 @@
+# Music Player
+
+```
+song_list <- music_dir
+
+song_list -> suffle -> playlist
+
+song_list   -> add
+            -> remove by dir
+
+PLAYLIST
+    -> remove first
+    -> add last
+
+playlist => [ A, B, C, D]
+
+WHEN playlist is empty -> resuffle song_list and add it to playlist
+
+
+QUEUE
+    -> add any song
+    -> remove any song
+
+IF play_queue not empty -> play until it empty
+ELSE -> play from playlist
+
+WHEN add song to queue -> remove it from playlist
+WHEN played the song in queue -> remove from queue
+
+
+PLAYER
+    -> play
+    -> pause
+    -> seek
+    -> next/prevoius song
+    -> song info
+    -? volume control
+
+[ ..., previous, current, next, ... ]
+[played        ]          [ queue ][ playlist ]
+played list
+    -> add last
+    -> remove last
+
+
+----- data
+Queue
+Plyed song
+Playlist
+Song list
+Player state
+
+----- input
+cmd
+    -> enqueue
+    -> remove from queue
+    -> player command
+    -> show queue
+    -> show playlist
+    -> show song list
+
+----- output
+player state => [song name / file name, playing time, song length, volume, play/pause]
+queue
+playlist
+played song
+
+----- roadmap
+[x] => play song from command line argument
+[ ] => play/pause a song with program command
+[ ] => playlist
+[ ] => queue
+[ ] => next/previous
+
+```
