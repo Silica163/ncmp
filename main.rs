@@ -33,7 +33,12 @@ fn main() {
     let audio_file = args[1].clone();
     println!("{audio_file}");
 
-    ma_wrapper::init();
+    let mut player: ma_wrapper::PlayerStatus = ma_wrapper::PlayerStatus {
+        playing: 0,
+        pause: 0,
+        ended: 0,
+    };
+    ma_wrapper::init(&player);
     ma_wrapper::play(audio_file);
     while !ma_wrapper::is_ended() {
         sleep!(100);

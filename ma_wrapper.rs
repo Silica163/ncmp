@@ -9,9 +9,9 @@ pub struct PlayerStatus {
 }
 
 // TODO: Return Result<bool, ma_result>
-pub fn init() -> i32 {
+pub fn init(player: *const PlayerStatus) -> i32 {
     unsafe {
-        maw_init()
+        maw_init(player)
     }
 }
 
@@ -41,7 +41,7 @@ pub fn get_player_status() -> *mut PlayerStatus {
 }
 
 extern "C" {
-    fn maw_init() -> c_int;
+    fn maw_init(player: *const PlayerStatus) -> c_int;
     fn maw_play(file: *const c_char) -> c_int;
     fn maw_is_ended() -> bool;
     fn maw_uninit();

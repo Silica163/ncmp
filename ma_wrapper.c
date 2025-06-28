@@ -9,7 +9,7 @@ typedef struct {
 } PlayerStatus;
 
 typedef struct {
-    PlayerStatus player;
+    PlayerStatus * player;
     ma_context ctx;
     ma_context_config ctx_cfg;
     ma_device device;
@@ -28,12 +28,12 @@ static Wrapper w;
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount){
     ma_mutex_lock(&w.mutex);
     float * f32out = (float*)pOutput;
-    if(w.player.playing && !w.player.pause){
+    if(w.player->playing && !w.player->pause){
         ma_uint64 pFrameRead;
         ma_decoder_read_pcm_frames(&w.decoder, f32out, frameCount, &pFrameRead);
         if(pFrameRead < frameCount){
-            w.player.ended = 1;
-            w.player.playing = 0;
+            w.player->ended = 1;
+            w.player->playing = 0;
         }
     } else {
         for(int i = 0; i < frameCount; i ++){
@@ -43,7 +43,13 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
     ma_mutex_unlock(&w.mutex);
 }
 
-int maw_init(){
+int maw_init(PlayerStatus * player){
+    if(player == NULL){
+        printf("pointer to PlayerStatus is NULL, please give me something else.");
+        exit(1);
+    }
+    w.player = player;
+
     ma_result result;
     w.ctx_cfg = ma_context_config_init();
     w.decoder_cfg = ma_decoder_config_init(SAMPLE_FORMAT, CHANNEL_COUNT, SAMPLE_RATE);
@@ -95,16 +101,16 @@ int maw_play(const char * file){
         printf("Could not decode from '%s'\n", file);
         return result;
     }
-    w.player.playing = 1;
-    w.player.ended = 0;
-    w.player.pause = 0;
+    w.player->playing = 1;
+    w.player->ended = 0;
+    w.player->pause = 0;
     return 0;
 }
 
 bool maw_is_ended(){
-    return w.player.ended;
+    return w.player->ended;
 }
 
 PlayerStatus * maw_get_player_status(){
-    return &w.player;
+    return w.player;
 }
