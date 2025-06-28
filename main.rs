@@ -48,17 +48,12 @@ fn main() {
     });
 
     let mut input = String::new();
-    loop {
+    let mut quit = false;
+    while !quit {
         print!("> "); io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).unwrap();
-        match parse_command(input.trim().to_string()) {
-            PlayerCommand::Play         => player_status.pause = 0,
-            PlayerCommand::Pause        => player_status.pause = 1,
-            PlayerCommand::TogglePause  => player_status.pause = !player_status.pause,
-            PlayerCommand::Quit         => break,
-            PlayerCommand::Unknown{cmd} => println!("Unknown command: {cmd}"),
-            PlayerCommand::Empty        => {},
-        }
+        let cmd = parse_command(input.trim().to_string());
+        execute_command(cmd, &mut player_status, &mut quit);
         input.clear();
     }
 
