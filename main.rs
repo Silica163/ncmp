@@ -4,7 +4,8 @@ use std::env;
 use std::thread;
 use std::time;
 use std::process;
-use std::ffi::*;
+use std::io;
+use std::io::Write;
 
 pub mod ma_wrapper;
 
@@ -33,25 +34,29 @@ fn main() {
     let audio_file = args[1].clone();
     println!("{audio_file}");
 
-    let mut player: ma_wrapper::PlayerStatus = ma_wrapper::PlayerStatus {
-        playing: 0,
-        pause: 0,
-        ended: 0,
-    };
+    let mut player = ma_wrapper::PlayerStatus { playing: 0, ended: 0, pause: 0, };
+
     ma_wrapper::init(&player);
-    ma_wrapper::play(audio_file);
-    while !ma_wrapper::is_ended() {
-        sleep!(100);
-    }
-    ma_wrapper::uninit();
-/*
+    thread::spawn( move || {
+        ma_wrapper::play(audio_file);
+        while !ma_wrapper::is_ended() {
+            sleep!(100);
+        }
+    });
+
     let mut input = String::new();
     loop {
-        print!("> "); io::stdout().flush()?;
-        io::stdin().read_line(&mut input)?;
-        println!("=> {}", input.trim());
-        if input.trim() == "exit" { return Ok(()) }
+        print!("> "); io::stdout().flush().unwrap();
+        io::stdin().read_line(&mut input).unwrap();
+        match input.trim() {
+            "play"  => player.pause = 0,
+            "pause" => player.pause = 1,
+            "p"     => player.pause = !player.pause,
+            "q"     => break,
+            _ => {},
+        }
         input.clear();
     }
-*/
+
+    ma_wrapper::uninit();
 }
