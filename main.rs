@@ -8,6 +8,9 @@ use std::io;
 use std::io::Write;
 
 pub mod ma_wrapper;
+pub mod player;
+
+use player::*;
 
 #[macro_export]
 macro_rules! c {
@@ -34,9 +37,9 @@ fn main() {
     let audio_file = args[1].clone();
     println!("{audio_file}");
 
-    let mut player = ma_wrapper::PlayerStatus { playing: 0, ended: 0, pause: 0, };
+    let mut player_status = ma_wrapper::PlayerStatus { playing: 0, ended: 0, pause: 0, };
 
-    ma_wrapper::init(&player);
+    ma_wrapper::init(&player_status);
     thread::spawn( move || {
         ma_wrapper::play(audio_file);
         while !ma_wrapper::is_ended() {
@@ -48,12 +51,13 @@ fn main() {
     loop {
         print!("> "); io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).unwrap();
-        match input.trim() {
-            "play"  => player.pause = 0,
-            "pause" => player.pause = 1,
-            "p"     => player.pause = !player.pause,
-            "q"     => break,
-            _ => {},
+        match parse_command(input.trim().to_string()) {
+            PlayerCommand::Play         => player_status.pause = 0,
+            PlayerCommand::Pause        => player_status.pause = 1,
+            PlayerCommand::TogglePause  => player_status.pause = !player_status.pause,
+            PlayerCommand::Quit         => break,
+            PlayerCommand::Unknown{cmd} => println!("Unknown command: {cmd}"),
+            PlayerCommand::Empty        => {},
         }
         input.clear();
     }

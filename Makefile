@@ -3,7 +3,7 @@ all: main
 run: main
 	./main
 
-main: Makefile main.rs ma_wrapper.rs ma_wrapper.o miniaudio.o
+main: Makefile player.rs main.rs ma_wrapper.rs ma_wrapper.o miniaudio.o
 	rustc -g -C link-args="ma_wrapper.o miniaudio.o -lm -lpthread" main.rs -o main 
 
 ma_wrapper.o: ma_wrapper.c
