@@ -1,9 +1,9 @@
 #![allow(non_camel_case_types)]
 
 use std::env;
-use std::io;
 use std::thread;
 use std::time;
+use std::process;
 use std::ffi::*;
 
 pub mod ma_wrapper;
@@ -21,41 +21,32 @@ macro_rules! sleep {
     };
 }
 
-fn main() -> io::Result<()> {
+fn main() {
     let args: Vec<String> = env::args().collect();
     let program = &args[0];
 
     if args.len() < 2 {
-        panic!("Usage: {} <audio file>", program);
+        println!("Usage: {} <audio file>", program);
+        process::exit(1);
     }
 
-    let mut audio_file = String::new();
-    audio_file = args[1].clone();
+    let audio_file = args[1].clone();
     println!("{audio_file}");
 
-    unsafe {
-        ma_wrapper::maw_init();
-        if 0 !=  ma_wrapper::maw_play(CString::new(audio_file)?.as_ptr()) {
-            return Ok(())
-        }
-        while !ma_wrapper::maw_is_ended() {
-            sleep!(100);
-        }
-        
-//        if 0 != ma_wrapper::maw_play(c!("/home/silica/Music/RUS/Durnoy Vkus/Durnoy Vkus - Plastinki (Records).mp3")) {
-//            return Ok(())
-//        }
-//        while !ma_wrapper::maw_is_ended() {}
-        ma_wrapper::maw_uninit();
+    ma_wrapper::init();
+    ma_wrapper::play(audio_file);
+    while !ma_wrapper::is_ended() {
+        sleep!(100);
     }
-    Ok(())
-
-//    let mut input = String::new();
-//    loop {
-//        print!("> "); io::stdout().flush()?;
-//        io::stdin().read_line(&mut input)?;
-//        println!("=> {}", input.trim());
-//        if input.trim() == "exit" { return Ok(()) }
-//        input.clear();
-//    }
+    ma_wrapper::uninit();
+/*
+    let mut input = String::new();
+    loop {
+        print!("> "); io::stdout().flush()?;
+        io::stdin().read_line(&mut input)?;
+        println!("=> {}", input.trim());
+        if input.trim() == "exit" { return Ok(()) }
+        input.clear();
+    }
+*/
 }

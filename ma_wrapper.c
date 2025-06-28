@@ -105,6 +105,6 @@ bool maw_is_ended(){
     return w.player.ended;
 }
 
-PlayerStatus * get_player_status(){
+PlayerStatus * maw_get_player_status(){
     return &w.player;
 }
