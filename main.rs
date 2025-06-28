@@ -25,6 +25,12 @@ macro_rules! sleep {
     };
 }
 
+fn try_exit(){
+    ma_wrapper::uninit();
+    println!();
+    process::exit(1);
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let program = &args[0];
@@ -45,10 +51,11 @@ fn main() {
         while !ma_wrapper::is_ended() {
             sleep!(100);
         }
+        try_exit();
     });
 
-    let mut input = String::new();
     let mut quit = false;
+    let mut input = String::new();
     while !quit {
         print!("> "); io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).unwrap();
@@ -57,5 +64,5 @@ fn main() {
         input.clear();
     }
 
-    ma_wrapper::uninit();
+    try_exit();
 }
