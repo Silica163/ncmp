@@ -67,7 +67,7 @@ played song
 
 ----- roadmap
 [x] => play song from command line argument
-[ ] => play/pause a song with program command
+[x] => play/pause a song with program command
 [ ] => playlist
 [ ] => queue
 [ ] => next/previous
