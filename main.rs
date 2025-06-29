@@ -40,16 +40,22 @@ fn main() {
         process::exit(1);
     }
 
-    let audio_file = args[1].clone();
-    println!("{audio_file}");
+    let mut audio_files: Vec<String> = vec![];
+    for i in 1..args.len() {
+        audio_files.push(args[i].clone());
+    }
+    println!("{audio_files:?}");
 
     let mut player_status = ma_wrapper::PlayerStatus { playing: 0, ended: 0, pause: 0, };
-
     ma_wrapper::init(&player_status);
     thread::spawn( move || {
-        ma_wrapper::play(audio_file);
-        while !ma_wrapper::is_ended() {
-            sleep!(100);
+        for i in 0..audio_files.len() {
+            let file = audio_files[i].clone();
+            println!("Playing: {}", file.rsplitn(2,"/").collect::<Vec<&str>>()[0]);
+            ma_wrapper::play(file);
+            while !ma_wrapper::is_ended() {
+                sleep!(100);
+            }
         }
         try_exit();
     });
