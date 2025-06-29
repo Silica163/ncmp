@@ -1,4 +1,21 @@
-# Music Player
+# Not complex Music Player
+
+## Feature
+
+- play and pause
+- shuffle playlist by default
+
+
+## Developement plan
+
+- [x] play song from command line argument
+- [x] play/pause a song with program command
+- [ ] playlist
+- [ ] queue
+- [ ] next/previous
+
+<details>
+<summary>More details...</summary>
 
 ```
 song_list <- music_dir
@@ -9,10 +26,6 @@ song_list   -> add
             -> remove by dir
 
 PLAYLIST
-    -> remove first
-    -> add last
-
-playlist => [ A, B, C, D]
 
 WHEN playlist is empty -> resuffle song_list and add it to playlist
 
@@ -65,11 +78,5 @@ queue
 playlist
 played song
 
------ roadmap
-[x] => play song from command line argument
-[x] => play/pause a song with program command
-[ ] => playlist
-[ ] => queue
-[ ] => next/previous
-
 ```
+</details>
