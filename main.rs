@@ -77,16 +77,18 @@ fn main() {
     println!("{audio_files:?}");
 
     let mut playlist: Vec<PlaylistItem> = vec![PlaylistItem::new_empty(); audio_files.len()];
-    for i in 0..audio_files.len() {
-        let idx = {
-            let mut idx = time_rand!(audio_files.len());
-            while playlist[idx].file != "" {
-                idx = time_rand!(audio_files.len());
-            }
-            idx
-        };
-        playlist[idx] = PlaylistItem::new(i, audio_files[i].clone());
+    {
+        let mut avaliable_slot: Vec<usize> = (0..audio_files.len()).collect();
+        for i in 0..audio_files.len() {
+            let idx = {
+                let idx = time_rand!(avaliable_slot.len());
+                avaliable_slot.remove(idx)
+            };
+            playlist[idx] = PlaylistItem::new(i, audio_files[i].clone());
+        }
     }
+
+    println!("{playlist:?}");
 
     let mut player_status = ma_wrapper::PlayerStatus { playing: 0, ended: 0, pause: 0, };
     ma_wrapper::init(&player_status);
