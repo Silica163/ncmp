@@ -71,13 +71,12 @@ fn main() {
     }
 
     let mut audio_files: Vec<String> = vec![];
-    let mut playlist: Vec<PlaylistItem> = vec![];
     for i in 1..args.len() {
         audio_files.push(args[i].clone());
-        playlist.push(PlaylistItem::new_empty());
     }
     println!("{audio_files:?}");
 
+    let mut playlist: Vec<PlaylistItem> = vec![PlaylistItem::new_empty(); audio_files.len()];
     for i in 0..audio_files.len() {
         let idx = {
             let mut idx = time_rand!(audio_files.len());
