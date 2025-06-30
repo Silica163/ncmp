@@ -9,8 +9,11 @@ use std::io::Write;
 
 pub mod ma_wrapper;
 pub mod player;
+pub mod playlist;
+
 
 use player::*;
+use playlist::*;
 
 #[macro_export]
 macro_rules! c {
@@ -25,40 +28,10 @@ macro_rules! sleep {
     };
 }
 
-macro_rules! time_rand {
-    ($max:expr) => {
-        (time::SystemTime::now().duration_since(time::SystemTime::UNIX_EPOCH).unwrap().as_micros() as usize) % $max
-    }
-}
-
 fn try_exit(){
     ma_wrapper::uninit();
     println!();
     process::exit(1);
-}
-
-#[derive(Debug, Clone)]
-struct PlaylistItem {
-    file: String,
-    file_idx: usize,
-    played: bool,
-}
-
-impl PlaylistItem {
-    pub fn new_empty() -> Self {
-        Self {
-            file: "".to_string(),
-            file_idx: 0,
-            played: false,
-        }
-    }
-    pub fn new(idx: usize, file: String) -> Self {
-        Self {
-            file: file,
-            file_idx: idx,
-            played: false,
-        }
-    }
 }
 
 fn main() {
@@ -70,24 +43,14 @@ fn main() {
         process::exit(1);
     }
 
+    // create a list of files
     let mut audio_files: Vec<String> = vec![];
     for i in 1..args.len() {
         audio_files.push(args[i].clone());
     }
     println!("{audio_files:?}");
 
-    let mut playlist: Vec<PlaylistItem> = vec![PlaylistItem::new_empty(); audio_files.len()];
-    {
-        let mut avaliable_slot: Vec<usize> = (0..audio_files.len()).collect();
-        for i in 0..audio_files.len() {
-            let idx = {
-                let idx = time_rand!(avaliable_slot.len());
-                avaliable_slot.remove(idx)
-            };
-            playlist[idx] = PlaylistItem::new(i, audio_files[i].clone());
-        }
-    }
-
+    let mut playlist = playlist_shuffle(&audio_files);
     println!("{playlist:?}");
 
     let mut player_status = ma_wrapper::PlayerStatus { playing: 0, ended: 0, pause: 0, };
@@ -113,6 +76,7 @@ fn main() {
                 song_idx = 0;
                 play_all = true;
             }
+
             play_all &= playlist[song_idx].played;
             playlist_ended = play_all;
         }
