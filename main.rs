@@ -13,7 +13,6 @@ pub mod playlist;
 
 
 use player::*;
-use playlist::*;
 
 #[macro_export]
 macro_rules! c {
@@ -50,17 +49,15 @@ fn main() {
     }
     println!("{audio_files:?}");
 
-    let mut playlist = playlist_shuffle(&audio_files);
-    println!("{playlist:?}");
+    let mut pl = playlist::shuffle(&audio_files);
+    println!("{pl:?}");
 
     let mut player_status = ma_wrapper::PlayerStatus { playing: 0, ended: 0, pause: 0, };
     ma_wrapper::init(&player_status);
     thread::spawn( move || {
-        let mut playlist_ended = false;
-        let mut play_all = true;
         let mut song_idx = 0;
-        while !playlist_ended {
-            let song = playlist[song_idx].clone();
+        while !playlist::is_ended(&pl) {
+            let song = pl[song_idx].clone();
             if !song.played {
                 let file = song.file.clone();
                 println!("Playing: {}", file.rsplitn(2,"/").collect::<Vec<&str>>()[0]);
@@ -68,17 +65,13 @@ fn main() {
                 while !ma_wrapper::is_ended() {
                     sleep!(100);
                 }
-                playlist[song_idx].played = true;
+                pl[song_idx].played = true;
             }
 
             song_idx += 1;
-            if song_idx >= playlist.len() {
+            if song_idx >= pl.len() {
                 song_idx = 0;
-                play_all = true;
             }
-
-            play_all &= playlist[song_idx].played;
-            playlist_ended = play_all;
         }
         try_exit();
     });
