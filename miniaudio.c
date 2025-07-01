@@ -1,0 +1,6 @@
+#define MINIAUDIO_IMPLEMENTATION
+#define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
+#define MA_ENABLE_JACK
+#define MA_ENABLE_ALSA
+//#define MA_DEBUG_OUTPUT
+#include "miniaudio.h"
