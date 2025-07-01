@@ -49,24 +49,25 @@ fn main() {
     for i in 1..args.len() {
         audio_files.push(args[i].clone());
     }
-    println!("{audio_files:?}");
+//    println!("{audio_files:?}");
 
-    let pl = Arc::new(Mutex::new(playlist::shuffle(&audio_files)));
-    println!("{pl:?}");
+    let playlist_main = Arc::new(Mutex::new(playlist::shuffle(&audio_files)));
+//    println!("{playlist_main:?}");
 
     let mut player_status = ma_wrapper::PlayerStatus { playing: 0, ended: 0, pause: 0, };
     ma_wrapper::init(&player_status);
     {
-        let pl2 = Arc::clone(&pl);
+        let playlist_thread = Arc::clone(&playlist_main);
         thread::spawn(move || {
             let mut song_idx:usize = 0;
-            while playlist::next(&mut pl2.lock().unwrap(), &mut song_idx) {
-                println!("Playing: {}", pl2.lock().unwrap()[song_idx].name.to_string());
-                ma_wrapper::play(pl2.lock().unwrap()[song_idx].file.to_string());
+            while playlist::next(&mut playlist_thread.lock().unwrap(), &mut song_idx) {
+                let song = playlist_thread.lock().unwrap()[song_idx].clone();
+                println!("Playing: {}", song.name.to_string());
+                ma_wrapper::play(song.file.to_string());
                 while !ma_wrapper::is_ended() {
                     sleep!(100);
                 }
-                pl2.lock().unwrap()[song_idx].played = true;
+                playlist_thread.lock().unwrap()[song_idx].played = true;
             }
             try_exit();
         });
@@ -78,7 +79,7 @@ fn main() {
         print!("> "); io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).unwrap();
         let cmd = parse_command(input.trim().to_string());
-        execute_command(cmd, &mut player_status, &pl.lock().unwrap(), &mut quit);
+        execute_command(cmd, &mut player_status, &playlist_main.lock().unwrap(), &mut quit);
         input.clear();
     }
 
