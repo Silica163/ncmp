@@ -6,6 +6,8 @@ use std::time;
 use std::process;
 use std::io;
 use std::io::Write;
+use std::sync::Arc;
+use std::sync::Mutex;
 
 pub mod ma_wrapper;
 pub mod player;
@@ -49,32 +51,26 @@ fn main() {
     }
     println!("{audio_files:?}");
 
-    let mut pl = playlist::shuffle(&audio_files);
+    let pl = Arc::new(Mutex::new(playlist::shuffle(&audio_files)));
     println!("{pl:?}");
 
     let mut player_status = ma_wrapper::PlayerStatus { playing: 0, ended: 0, pause: 0, };
     ma_wrapper::init(&player_status);
-    thread::spawn( move || {
-        let mut song_idx = 0;
-        while !playlist::is_ended(&pl) {
-            let song = pl[song_idx].clone();
-            if !song.played {
-                let file = song.file.clone();
-                println!("Playing: {}", file.rsplitn(2,"/").collect::<Vec<&str>>()[0]);
-                ma_wrapper::play(file);
+    {
+        let pl2 = Arc::clone(&pl);
+        thread::spawn(move || {
+            let mut song_idx:usize = 0;
+            while playlist::next(&mut pl2.lock().unwrap(), &mut song_idx) {
+                println!("Playing: {}", pl2.lock().unwrap()[song_idx].name.to_string());
+                ma_wrapper::play(pl2.lock().unwrap()[song_idx].file.to_string());
                 while !ma_wrapper::is_ended() {
                     sleep!(100);
                 }
-                pl[song_idx].played = true;
+                pl2.lock().unwrap()[song_idx].played = true;
             }
-
-            song_idx += 1;
-            if song_idx >= pl.len() {
-                song_idx = 0;
-            }
-        }
-        try_exit();
-    });
+            try_exit();
+        });
+    }
 
     let mut quit = false;
     let mut input = String::new();

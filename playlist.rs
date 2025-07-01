@@ -45,8 +45,16 @@ pub fn shuffle(files: &Vec<String>) -> Vec<PlaylistItem> {
     playlist
 }
 
-pub fn next(playlist: &mut Vec<PlaylistItem>, current_song: &mut usize) {
-
+pub fn next(playlist: &mut Vec<PlaylistItem>, current_song: &mut usize) -> bool {
+    let mut next_song = *current_song;
+    for _ in 0..(playlist.len()+1) {
+        if !playlist[next_song].played {
+            *current_song = next_song;
+            return true
+        }
+        next_song = (next_song + 1) % playlist.len();
+    }
+    return false
 }
 
 pub fn is_ended(playlist: &Vec<PlaylistItem>) -> bool {
