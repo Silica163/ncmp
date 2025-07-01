@@ -1,10 +1,19 @@
+RSS=\
+	player.rs \
+	ma_wrapper.rs \
+	playlist.rs
+
+OBJS=\
+	 ma_wrapper.o \
+	 miniaudio.o
+
 all: main
 
 run: main
 	./main
 
-main: Makefile player.rs main.rs ma_wrapper.rs ma_wrapper.o miniaudio.o
-	rustc -g -C link-args="ma_wrapper.o miniaudio.o -lm -lpthread" main.rs -o main 
+main: $(RSS) $(OBJS) main.rs
+	rustc -g -C link-args="$(OBJS) -lm -lpthread" main.rs -o main 
 
 ma_wrapper.o: ma_wrapper.c
 	gcc -ggdb -fPIC -c ma_wrapper.c -o ma_wrapper.o 
