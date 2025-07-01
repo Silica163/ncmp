@@ -62,25 +62,25 @@ int maw_init(PlayerStatus * player){
 
     result = ma_context_init(NULL, 0, &w.ctx_cfg, &w.ctx);
     if (result != MA_SUCCESS) {
-        printf("Could not init context\n");
+        printf("Could not init context: %d\n", result);
         return result;
     }
 
     result = ma_device_init(&w.ctx, &w.dev_cfg, &w.device);
     if (result != MA_SUCCESS) {
-        printf("Could not init device\n");
+        printf("Could not init device: %d\n", result);
         return result;
     }
     
     result = ma_mutex_init(&w.mutex);
     if (result != MA_SUCCESS) {
-        printf("Could not init mutex\n");
+        printf("Could not init mutex: %d\n", result);
         return result;
     }
 
     result = ma_device_start(&w.device);
     if (result != MA_SUCCESS) {
-        printf("Could not start device\n");
+        printf("Could not start device: %d\n", result);
         return result;
     }
 
