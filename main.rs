@@ -78,7 +78,7 @@ fn main() {
         print!("> "); io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).unwrap();
         let cmd = parse_command(input.trim().to_string());
-        execute_command(cmd, &mut player_status, &mut quit);
+        execute_command(cmd, &mut player_status, &pl.lock().unwrap(), &mut quit);
         input.clear();
     }
 

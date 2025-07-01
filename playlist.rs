@@ -64,3 +64,11 @@ pub fn is_ended(playlist: &Vec<PlaylistItem>) -> bool {
     }
     return true
 }
+
+pub fn show(playlist: &Vec<PlaylistItem>){
+    println!("========== playlist ==========");
+    for (index, item) in playlist.iter().enumerate() {
+        println!("{index:03}: {}", item.name);
+    }
+    println!("==============================");
+}
