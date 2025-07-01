@@ -1,19 +1,21 @@
+BUILD=build
+SRC=src
 RSS=\
-	player.rs \
-	ma_wrapper.rs \
-	playlist.rs
+	$(SRC)/player.rs \
+	$(SRC)/ma_wrapper.rs \
+	$(SRC)/playlist.rs
 
 OBJS=\
-	 ma_wrapper.o \
-	 miniaudio.o
+	 $(BUILD)/ma_wrapper.o \
+	 $(BUILD)/miniaudio.o
 
 all: main
 
-run: main
-	./main
+main: $(RSS) $(OBJS) $(SRC)/main.rs | $(BUILD)
+	rustc -g -C link-args="$(OBJS) -lm -lpthread" $(SRC)/main.rs -o ncmp
 
-main: $(RSS) $(OBJS) main.rs
-	rustc -g -C link-args="$(OBJS) -lm -lpthread" main.rs -o main 
-
-%.o:%.c
+$(BUILD)/%.o:./clib/%.c | $(BUILD)
 	gcc -g -fPIC -c $< -o $@
+
+$(BUILD):
+	mkdir -pv $(BUILD)
