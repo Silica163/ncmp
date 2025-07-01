@@ -42,8 +42,8 @@ WHEN played the song in queue -> remove from queue
 
 
 PLAYER
-    -> play
-    -> pause
+x   -> play
+x   -> pause
     -> seek
     -> next/prevoius song
     -> song info
@@ -69,7 +69,7 @@ cmd
     -> remove from queue
     -> player command
     -> show queue
-    -> show playlist
+x   -> show playlist
     -> show song list
 
 ----- output
