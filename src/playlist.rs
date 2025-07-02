@@ -1,4 +1,6 @@
 use std::time;
+use filelist;
+
 macro_rules! time_rand {
     ($max:expr) => {
         (time::SystemTime::now().duration_since(time::SystemTime::UNIX_EPOCH).unwrap().as_micros() as usize) % $max
@@ -7,8 +9,6 @@ macro_rules! time_rand {
 
 #[derive(Debug, Clone)]
 pub struct PlaylistItem {
-    pub name: String,
-    pub file: String,
     pub file_idx: usize,
     pub played: bool,
 }
@@ -16,23 +16,19 @@ pub struct PlaylistItem {
 impl PlaylistItem {
     pub fn new_empty() -> Self {
         Self {
-            name: "".to_string(),
-            file: "".to_string(),
             file_idx: 0,
             played: false,
         }
     }
-    pub fn new(idx: usize, file: String) -> Self {
+    pub fn new(idx: usize) -> Self {
         Self {
-            name: file.rsplitn(2,"/").collect::<Vec<&str>>()[0].to_string(),
-            file: file,
             file_idx: idx,
             played: false,
         }
     }
 }
 
-pub fn shuffle(files: &Vec<String>) -> Vec<PlaylistItem> {
+pub fn shuffle(files: &Vec<filelist::FileInfo>) -> Vec<PlaylistItem> {
     let mut playlist: Vec<PlaylistItem> = vec![PlaylistItem::new_empty(); files.len()];
     let mut avaliable_slot: Vec<usize> = (0..files.len()).collect();
     for i in 0..files.len() {
@@ -40,7 +36,7 @@ pub fn shuffle(files: &Vec<String>) -> Vec<PlaylistItem> {
             let idx = time_rand!(avaliable_slot.len());
             avaliable_slot.remove(idx)
         };
-        playlist[idx] = PlaylistItem::new(i, files[i].clone());
+        playlist[idx] = PlaylistItem::new(i);
     }
     playlist
 }
@@ -65,10 +61,10 @@ pub fn is_ended(playlist: &Vec<PlaylistItem>) -> bool {
     return true
 }
 
-pub fn show(playlist: &Vec<PlaylistItem>){
+pub fn show(playlist: &Vec<PlaylistItem>, files: &Vec<filelist::FileInfo>){
     println!("========== playlist ==========");
     for (index, item) in playlist.iter().enumerate() {
-        println!("{index:03}: {}", item.name);
+        println!("{index:03}: {}", files[item.file_idx].name);
     }
     println!("==============================");
 }

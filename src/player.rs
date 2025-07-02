@@ -1,5 +1,6 @@
 use ma_wrapper;
 use playlist;
+use filelist;
 
 pub enum PlayerCommand {
     Play,
@@ -26,13 +27,19 @@ pub fn parse_command(user_input: String) -> PlayerCommand {
     }
 }
 
-pub fn execute_command(cmd: PlayerCommand, ps: &mut ma_wrapper::PlayerStatus, pl: &Vec<playlist::PlaylistItem>, quit: &mut bool) {
+pub fn execute_command(
+    cmd: PlayerCommand,
+    ps: &mut ma_wrapper::PlayerStatus,
+    pl: &Vec<playlist::PlaylistItem>,
+    files: &Vec<filelist::FileInfo>,
+    quit: &mut bool
+) {
     match cmd {
         PlayerCommand::Play         => ps.pause = 0,
         PlayerCommand::Pause        => ps.pause = 1,
         PlayerCommand::TogglePause  => ps.pause = !ps.pause,
         PlayerCommand::Quit         => *quit = true,
-        PlayerCommand::ViewPlaylist => playlist::show(pl),
+        PlayerCommand::ViewPlaylist => playlist::show(pl, files),
         PlayerCommand::Unknown{cmd} => println!("Unknown command: {cmd}"),
         PlayerCommand::Empty        => {},
     }
