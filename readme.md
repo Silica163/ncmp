@@ -10,7 +10,7 @@
 
 - [x] play song from command line argument
 - [x] play/pause a song with program command
-- [ ] playlist
+- [x] playlist
 - [ ] queue
 - [ ] next/previous
 
@@ -76,6 +76,7 @@ x   -> show playlist
 player state => [song name / file name, playing time, song length, volume, play/pause]
 queue
 playlist
+song_list
 played song
 
 ```
