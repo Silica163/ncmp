@@ -5,6 +5,20 @@
 - play and pause
 - shuffle playlist by default
 
+## Usage
+
+To use this program, download or clone this repo and build it with `make`.
+
+```shell
+./ncmp <audio files>
+```
+
+Internal command
+- play
+- pause
+- p (toggle play/pause)
+- playlist (show playlist)
+- q, exit, quit
 
 ## Developement plan
 
