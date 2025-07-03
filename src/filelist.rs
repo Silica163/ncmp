@@ -1,3 +1,5 @@
+// TODO: Use HashMap instead of Vec
+
 use std::fs;
 #[derive(Debug, Clone)]
 pub struct FileInfo {
@@ -28,4 +30,12 @@ pub fn scan_path(path: String, files: &mut Vec<FileInfo>) -> Option<()> {
         files.push(FileInfo::new(path));
     }
     Some(())
+}
+
+pub fn show(files: &Vec<FileInfo>, full_path: bool) {
+    println!("========== files =============");
+    for (index, file) in files.iter().enumerate() {
+        println!("{index:03}: {}", if full_path { file.path.clone() } else { file.name.clone() });
+    }
+    println!("==============================");
 }

@@ -8,6 +8,7 @@ pub enum PlayerCommand {
     TogglePause,
     Quit,
     ViewPlaylist,
+    ViewFiles { full_path: bool },
     Unknown { cmd: String},
     Empty,
 }
@@ -22,6 +23,8 @@ pub fn parse_command(user_input: String) -> PlayerCommand {
         "quit"      => PlayerCommand::Quit,
         "exit"      => PlayerCommand::Quit,
         "playlist"  => PlayerCommand::ViewPlaylist,
+        "files"     => PlayerCommand::ViewFiles { full_path: true },
+        "f"         => PlayerCommand::ViewFiles { full_path: false},
         ""          => PlayerCommand::Empty,
         cmd         => PlayerCommand::Unknown { cmd: cmd.to_string() } ,
     }
@@ -40,6 +43,7 @@ pub fn execute_command(
         PlayerCommand::TogglePause  => ps.pause = !ps.pause,
         PlayerCommand::Quit         => *quit = true,
         PlayerCommand::ViewPlaylist => playlist::show(pl, files),
+        PlayerCommand::ViewFiles{full_path}    => filelist::show(files, full_path),
         PlayerCommand::Unknown{cmd} => println!("Unknown command: {cmd}"),
         PlayerCommand::Empty        => {},
     }
