@@ -50,9 +50,13 @@ fn main() {
     // create a list of files
     let mut audio_files: Vec<FileInfo> = vec![];
     for i in 1..args.len() {
-        audio_files.push(FileInfo::new(args[i].clone()));
+        filelist::scan_path(args[i].clone(), &mut audio_files);
     }
-//    println!("{audio_files:?}");
+
+//    for file in audio_files.iter(){
+//        println!("{file:?}");
+//    }
+//    process::exit(0);
 
     let mut pl = playlist::shuffle(&audio_files);
 //    println!("{pl:?}");

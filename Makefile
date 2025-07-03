@@ -3,7 +3,8 @@ SRC=src
 RSS=\
 	$(SRC)/player.rs \
 	$(SRC)/ma_wrapper.rs \
-	$(SRC)/playlist.rs
+	$(SRC)/playlist.rs \
+	$(SRC)/filelist.rs
 
 OBJS=\
 	 $(BUILD)/ma_wrapper.o \
