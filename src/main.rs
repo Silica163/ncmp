@@ -9,6 +9,7 @@ use std::io::Write;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::mpsc::channel;
+use std::collections::BTreeMap;
 
 pub mod ma_wrapper;
 pub mod player;
@@ -48,15 +49,13 @@ fn main() {
     }
 
     // create a list of files
-    let mut audio_files: Vec<FileInfo> = vec![];
+    let mut input_path: Vec<String> = vec![];
     for i in 1..args.len() {
-        filelist::scan_path(args[i].clone(), &mut audio_files);
+        input_path.push(args[i].clone());
     }
 
-//    for file in audio_files.iter(){
-//        println!("{file:?}");
-//    }
-//    process::exit(0);
+    let mut audio_files: BTreeMap<usize, FileInfo> = BTreeMap::new();
+    scan_and_sort_path(input_path, &mut audio_files);
 
     let mut pl = playlist::shuffle(&audio_files);
 //    println!("{pl:?}");
@@ -88,9 +87,9 @@ fn main() {
 
     let mut song_idx:usize = 0;
     while playlist::next(&mut pl, &mut song_idx) {
-        let song = audio_files[pl[song_idx].clone().file_idx].clone();
+        let song = audio_files.get(&(pl[song_idx].file_idx)).unwrap();
         println!("Playing: {}", song.name);
-        ma_wrapper::play(song.path);
+        ma_wrapper::play(song.path.clone());
         while !ma_wrapper::is_ended() {
             if *command_avaliable.lock().unwrap() {
                 let mut quit = false;

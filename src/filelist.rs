@@ -1,6 +1,5 @@
-// TODO: Use HashMap instead of Vec
-
 use std::fs;
+use std::collections::BTreeMap;
 #[derive(Debug, Clone)]
 pub struct FileInfo {
     pub path: String,
@@ -18,7 +17,18 @@ impl FileInfo {
     }
 }
 
-pub fn scan_path(path: String, files: &mut Vec<FileInfo>) -> Option<()> {
+pub fn scan_and_sort_path(paths: Vec<String>, files: &mut BTreeMap<usize, FileInfo>) {
+    let mut files_str: Vec<String> = vec![];
+    for path in paths.iter() {
+        scan_path(path.to_string(), &mut files_str);
+    }
+    files_str.sort();
+    for (id, path) in files_str.iter().enumerate() {
+        files.insert(id, FileInfo::new(path.to_string()));
+    }
+}
+
+pub fn scan_path(path: String, files: &mut Vec<String>) -> Option<()> {
     let path_type = fs::symlink_metadata(&path).ok()?.file_type();
     if path_type.is_symlink() { println!("{} how to scan symlink?", path); return Some(()) }
     if path_type.is_dir() {
@@ -27,15 +37,15 @@ pub fn scan_path(path: String, files: &mut Vec<FileInfo>) -> Option<()> {
         }
     }
     if path_type.is_file() {
-        files.push(FileInfo::new(path));
+        files.push(path);
     }
     Some(())
 }
 
-pub fn show(files: &Vec<FileInfo>, full_path: bool) {
+pub fn show(files: &BTreeMap<usize, FileInfo>, full_path: bool) {
     println!("========== files =============");
-    for (index, file) in files.iter().enumerate() {
-        println!("{index:03}: {}", if full_path { file.path.clone() } else { file.name.clone() });
+    for (id, file) in files.iter() {
+        println!("{id:03}: {}", if full_path { file.path.clone() } else { file.name.clone() });
     }
     println!("==============================");
 }

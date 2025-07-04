@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use ma_wrapper;
 use playlist;
 use filelist;
@@ -34,7 +35,7 @@ pub fn execute_command(
     cmd: PlayerCommand,
     ps: &mut ma_wrapper::PlayerStatus,
     pl: &Vec<playlist::PlaylistItem>,
-    files: &Vec<filelist::FileInfo>,
+    files: &BTreeMap<usize, filelist::FileInfo>,
     quit: &mut bool
 ) {
     match cmd {

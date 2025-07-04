@@ -1,4 +1,5 @@
 use std::time;
+use std::collections::BTreeMap;
 use filelist;
 
 macro_rules! time_rand {
@@ -28,7 +29,7 @@ impl PlaylistItem {
     }
 }
 
-pub fn shuffle(files: &Vec<filelist::FileInfo>) -> Vec<PlaylistItem> {
+pub fn shuffle(files: &BTreeMap<usize, filelist::FileInfo>) -> Vec<PlaylistItem> {
     let mut playlist: Vec<PlaylistItem> = vec![PlaylistItem::new_empty(); files.len()];
     let mut avaliable_slot: Vec<usize> = (0..files.len()).collect();
     for i in 0..files.len() {
@@ -61,10 +62,13 @@ pub fn is_ended(playlist: &Vec<PlaylistItem>) -> bool {
     return true
 }
 
-pub fn show(playlist: &Vec<PlaylistItem>, files: &Vec<filelist::FileInfo>){
+pub fn show(playlist: &Vec<PlaylistItem>, files: &BTreeMap<usize, filelist::FileInfo>){
     println!("========== playlist ==========");
     for (index, item) in playlist.iter().enumerate() {
-        println!("{index:03}: {}", files[item.file_idx].name);
+        match files.get(&(item.file_idx)) {
+            Some(file) => println!("{index:03}: {}", file.name),
+            None => { println!("file id {index:03} is not exists in file list.")},
+        }
     }
     println!("==============================");
 }
