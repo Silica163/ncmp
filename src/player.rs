@@ -4,14 +4,20 @@ use playlist;
 use filelist;
 
 pub enum PlayerCommand {
+    // player
     Play,
     Pause,
     TogglePause,
+    Seek { target_sec: i32 },
     Quit,
+
+    // playlist/files
     ViewPlaylist,
     ViewFiles { full_path: bool },
     RemoveFileById { id: usize },
-    Unknown { cmd: String},
+
+    // other
+    Unknown { cmd: String },
     Empty,
 }
 
@@ -26,12 +32,24 @@ fn parse_remove_command(cmd: &Vec<&str>) -> PlayerCommand {
     }
 }
 
+fn parse_seek_command(cmd: &Vec<&str>) -> PlayerCommand {
+    if cmd.len() < 2 { return PlayerCommand::Empty; }
+    match cmd[1].parse::<i32>() {
+        Ok(target_sec)  => PlayerCommand::Seek { target_sec },
+        _   => {
+            println!("Expect number but got `{}`", cmd[1]);
+            PlayerCommand::Empty
+        },
+    }
+}
+
 pub fn parse_command(user_input: String) -> PlayerCommand {
     let cmd: Vec<&str> = user_input.trim_start().splitn(2, " ").collect();
     match cmd[0] {
-        "p"         => PlayerCommand::TogglePause,
         "play"      => PlayerCommand::Play,
         "pause"     => PlayerCommand::Pause,
+        "p"         => PlayerCommand::TogglePause,
+        "seek"      => parse_seek_command(&cmd),
         "q"         => PlayerCommand::Quit,
         "quit"      => PlayerCommand::Quit,
         "exit"      => PlayerCommand::Quit,
@@ -56,6 +74,7 @@ pub fn execute_command(
         PlayerCommand::Play         => ps.pause = 0,
         PlayerCommand::Pause        => ps.pause = 1,
         PlayerCommand::TogglePause  => ps.pause = !ps.pause,
+        PlayerCommand::Seek{target_sec}     => { ma_wrapper::seek_to_sec(target_sec); () },
         PlayerCommand::Quit         => *quit = true,
         PlayerCommand::ViewPlaylist => playlist::show(pl, files),
         PlayerCommand::ViewFiles{full_path} => filelist::show(files, full_path),
