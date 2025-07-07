@@ -114,3 +114,12 @@ bool maw_is_ended(){
 PlayerStatus * maw_get_player_status(){
     return w.player;
 }
+
+int maw_get_length_in_secs(){
+    ma_uint64 frames = 0;
+    if(ma_data_source_get_length_in_pcm_frames(&w.decoder, &frames) != MA_SUCCESS){
+        return -1;
+    }
+    int length = frames / SAMPLE_RATE;
+    return length;
+}

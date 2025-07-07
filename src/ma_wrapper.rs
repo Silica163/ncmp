@@ -40,10 +40,17 @@ pub fn get_player_status() -> *mut PlayerStatus {
     }
 }
 
+pub fn get_length_in_secs() -> i32 {
+    unsafe {
+        maw_get_length_in_secs()
+    }
+}
+
 extern "C" {
     fn maw_init(player: *const PlayerStatus) -> c_int;
     fn maw_play(file: *const c_char) -> c_int;
     fn maw_is_ended() -> bool;
     fn maw_uninit();
     fn maw_get_player_status() -> *mut PlayerStatus;
+    fn maw_get_length_in_secs() -> c_int;
 }
