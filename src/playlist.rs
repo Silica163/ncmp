@@ -50,6 +50,7 @@ pub fn next(playlist: &mut Vec<PlaylistItem>, current_song: &mut usize) -> bool 
     for _ in 0..(playlist.len()+1) {
         if !playlist[next_song].played {
             *current_song = next_song;
+            playlist[next_song].played = true;
             return true
         }
         next_song = (next_song + 1) % playlist.len();

@@ -98,7 +98,6 @@ fn main() {
             }
             sleep!(100);
         }
-        pl[song_idx].played = true;
     }
     try_exit();
 }
