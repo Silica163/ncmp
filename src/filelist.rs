@@ -49,3 +49,10 @@ pub fn show(files: &BTreeMap<usize, FileInfo>, full_path: bool) {
     }
     println!("==============================");
 }
+
+pub fn remove(files: &mut BTreeMap<usize, FileInfo>, id: usize){
+    match files.remove(&id) {
+        Some(file)  => println!("file {} removed.", file.name),
+        None        => println!("file id {id} is not exist."),
+    }
+}

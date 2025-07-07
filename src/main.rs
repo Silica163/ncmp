@@ -94,7 +94,7 @@ fn main() {
             if *command_avaliable.lock().unwrap() {
                 let mut quit = false;
                 *command_avaliable.lock().unwrap() = false;
-                execute_command(cmd_rx.recv().unwrap(), &mut player_status, &pl, &audio_files, &mut quit);
+                execute_command(cmd_rx.recv().unwrap(), &mut player_status, &pl, &mut audio_files, &mut quit);
                 quit_tx.send(quit).unwrap();
             }
             sleep!(100);
