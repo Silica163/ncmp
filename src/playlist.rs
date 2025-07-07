@@ -42,6 +42,8 @@ pub fn shuffle(files: &BTreeMap<usize, filelist::FileInfo>) -> Vec<PlaylistItem>
     playlist
 }
 
+// get next song
+// return false when playlist is ended
 pub fn next(playlist: &mut Vec<PlaylistItem>, current_song: &mut usize) -> bool {
     let mut next_song = *current_song;
     for _ in 0..(playlist.len()+1) {

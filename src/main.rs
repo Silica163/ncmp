@@ -17,7 +17,6 @@ pub mod playlist;
 pub mod filelist;
 
 
-use player::*;
 use filelist::*;
 
 #[macro_export]
@@ -64,7 +63,7 @@ fn main() {
     ma_wrapper::init(&player_status);
 
     let command_avaliable = Arc::new(Mutex::new(false));
-    let (cmd_tx, cmd_rx) = channel::<PlayerCommand>();
+    let (cmd_tx, cmd_rx) = channel::<player::PlayerCommand>();
     let (quit_tx, quit_rx) = channel::<bool>();
     {
         let thread_command_avaliable = Arc::clone(&command_avaliable);
@@ -74,7 +73,7 @@ fn main() {
             while !quit {
                 print!("> "); io::stdout().flush().unwrap();
                 io::stdin().read_line(&mut input).unwrap();
-                let cmd = parse_command(input.trim().to_string());
+                let cmd = player::parse_command(input.trim().to_string());
                 input.clear();
                 cmd_tx.send(cmd).unwrap();
                 *thread_command_avaliable.lock().unwrap() = true;
@@ -86,18 +85,15 @@ fn main() {
     }
 
     let mut song_idx:usize = 0;
-    while playlist::next(&mut pl, &mut song_idx) {
-
-        // TODO: report error or remove playlist entry that link to non existing file.
+    while player::next(&audio_files, &mut pl, &mut song_idx) {
         let song = audio_files.get(&(pl[song_idx].file_idx)).unwrap();
-
         println!("Playing: {}", song.name);
         ma_wrapper::play(song.path.clone());
         while !ma_wrapper::is_ended() {
             if *command_avaliable.lock().unwrap() {
                 let mut quit = false;
                 *command_avaliable.lock().unwrap() = false;
-                execute_command(cmd_rx.recv().unwrap(), &mut player_status, &pl, &mut audio_files, &mut quit);
+                player::execute_command(cmd_rx.recv().unwrap(), &mut player_status, &pl, &mut audio_files, &mut quit);
                 quit_tx.send(quit).unwrap();
             }
             sleep!(100);
