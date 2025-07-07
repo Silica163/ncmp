@@ -2,7 +2,7 @@
 
 ## Feature
 
-- play and pause
+- play, pause, seek
 - shuffle playlist by default
 
 ## Usage
@@ -10,13 +10,16 @@
 To use this program, download or clone this repo and build it with `make`.
 
 ```shell
-./ncmp <audio files>
+./ncmp <audio files or directory>
 ```
 
 Internal command
 - play
 - pause
 - p (toggle play/pause)
+- seek <sec> (seek to <sec>)
+- f, filelist (show filelist)
+- r, remove (remove file form filelist)
 - playlist (show playlist)
 - q, exit, quit
 
@@ -58,7 +61,7 @@ WHEN played the song in queue -> remove from queue
 PLAYER
 x   -> play
 x   -> pause
-    -> seek
+x   -> seek
     -> next/prevoius song
     -> song info
     -? volume control

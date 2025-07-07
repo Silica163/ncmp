@@ -10,9 +10,9 @@ OBJS=\
 	 $(BUILD)/ma_wrapper.o \
 	 $(BUILD)/miniaudio.o
 
-all: main
+all: ncmp
 
-main: $(RSS) $(OBJS) $(SRC)/main.rs | $(BUILD)
+ncmp : $(RSS) $(OBJS) $(SRC)/main.rs | $(BUILD)
 	rustc -g -C link-args="$(OBJS) -lm -lpthread" $(SRC)/main.rs -o ncmp
 
 $(BUILD)/%.o:./clib/%.c | $(BUILD)
