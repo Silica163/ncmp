@@ -56,7 +56,7 @@ fn main() {
     let mut audio_files: BTreeMap<usize, FileInfo> = BTreeMap::new();
     scan_and_sort_path(input_path, &mut audio_files);
 
-    let mut pl = playlist::shuffle(&audio_files);
+    let mut pl = playlist::shuffle(&mut audio_files);
 //    println!("{pl:?}");
 
     let mut player_status = ma_wrapper::PlayerStatus { playing: 0, ended: 0, pause: 0, };
@@ -93,7 +93,7 @@ fn main() {
             if *command_avaliable.lock().unwrap() {
                 let mut quit = false;
                 *command_avaliable.lock().unwrap() = false;
-                player::execute_command(cmd_rx.recv().unwrap(), &mut player_status, &pl, &mut audio_files, &mut quit);
+                player::execute_command(cmd_rx.recv().unwrap(), &mut player_status, &mut pl, &mut audio_files, &mut quit);
                 quit_tx.send(quit).unwrap();
             }
             sleep!(100);

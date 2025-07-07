@@ -66,7 +66,7 @@ pub fn parse_command(user_input: String) -> PlayerCommand {
 pub fn execute_command(
     cmd: PlayerCommand,
     ps: &mut ma_wrapper::PlayerStatus,
-    pl: &Vec<playlist::PlaylistItem>,
+    pl: &mut Vec<playlist::PlaylistItem>,
     files: &mut BTreeMap<usize, filelist::FileInfo>,
     quit: &mut bool
 ) {
@@ -78,7 +78,12 @@ pub fn execute_command(
         PlayerCommand::Quit         => *quit = true,
         PlayerCommand::ViewPlaylist => playlist::show(pl, files),
         PlayerCommand::ViewFiles{full_path} => filelist::show(files, full_path),
-        PlayerCommand::RemoveFileById{id}   => filelist::remove(files, id),
+        PlayerCommand::RemoveFileById{id}   => {
+            match filelist::remove(files, id){
+                Some(idx)   => { pl.remove(idx); },
+                None        => {},
+            }
+        },
         PlayerCommand::Unknown{cmd} => println!("Unknown command: {cmd}"),
         PlayerCommand::Empty        => {},
     }

@@ -29,15 +29,16 @@ impl PlaylistItem {
     }
 }
 
-pub fn shuffle(files: &BTreeMap<usize, filelist::FileInfo>) -> Vec<PlaylistItem> {
+pub fn shuffle(files: &mut BTreeMap<usize, filelist::FileInfo>) -> Vec<PlaylistItem> {
     let mut playlist: Vec<PlaylistItem> = vec![PlaylistItem::new_empty(); files.len()];
     let mut avaliable_slot: Vec<usize> = (0..files.len()).collect();
-    for i in 0..files.len() {
+    for i in files.clone().keys() {
         let idx = {
             let idx = time_rand!(avaliable_slot.len());
             avaliable_slot.remove(idx)
         };
-        playlist[idx] = PlaylistItem::new(i);
+        playlist[idx] = PlaylistItem::new(*i);
+        files.get_mut(i).unwrap().playlist_index = idx;
     }
     playlist
 }
