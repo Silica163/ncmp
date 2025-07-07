@@ -8,11 +8,18 @@ pub struct PlayerStatus {
     pub pause:   c_int,
 }
 
-// TODO: Return Result<bool, ma_result>
-pub fn init(player: *const PlayerStatus) -> i32 {
+pub enum WrapperResult {
+    Success,
+    Error { code: c_int },
+}
+
+pub fn init(player: *const PlayerStatus) -> Option<WrapperResult> {
+    let r;
     unsafe {
-        maw_init(player)
+        r = maw_init(player);
     }
+    if r == 0 { return Some(WrapperResult::Success); }
+    Some(WrapperResult::Error { code: r })
 }
 
 pub fn uninit() {
@@ -27,11 +34,13 @@ pub fn is_ended() -> bool {
     }
 }
 
-// TODO: Return Result<bool, ma_result>
-pub fn play(file: String) -> i32 {
+pub fn play(file: String) ->  Option<WrapperResult> {
+    let r;
     unsafe {
-        maw_play(CString::new(file).unwrap().as_ptr())
+        r = maw_play(CString::new(file).unwrap().as_ptr());
     }
+    if r == 0 { return Some(WrapperResult::Success); }
+    Some(WrapperResult::Error { code: r })
 }
 
 pub fn get_player_status() -> *mut PlayerStatus {
@@ -52,10 +61,13 @@ pub fn get_cursor_in_secs() -> i32 {
     }
 }
 
-pub fn seek_to_sec(sec: i32) -> i32 {
+pub fn seek_to_sec(sec: i32) -> Option<WrapperResult> {
+    let r;
     unsafe {
-        maw_seek_to_sec(sec)
+        r = maw_seek_to_sec(sec);
     }
+    if r == 0 { return Some(WrapperResult::Success); }
+    Some(WrapperResult::Error { code: r })
 }
 
 extern "C" {
