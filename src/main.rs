@@ -87,7 +87,10 @@ fn main() {
 
     let mut song_idx:usize = 0;
     while playlist::next(&mut pl, &mut song_idx) {
+
+        // TODO: report error or remove playlist entry that link to non existing file.
         let song = audio_files.get(&(pl[song_idx].file_idx)).unwrap();
+
         println!("Playing: {}", song.name);
         ma_wrapper::play(song.path.clone());
         while !ma_wrapper::is_ended() {
