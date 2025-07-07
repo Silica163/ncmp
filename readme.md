@@ -84,7 +84,7 @@ cmd
     -> player command
     -> show queue
 x   -> show playlist
-    -> show song list
+x   -> show song list
 
 ----- output
 player state => [song name / file name, playing time, song length, volume, play/pause]
