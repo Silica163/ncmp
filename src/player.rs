@@ -91,12 +91,16 @@ pub fn execute_command(
 
 pub fn next(
     files: &BTreeMap<usize, filelist::FileInfo>,
+    out_file: &mut filelist::FileInfo,
     pl: &mut Vec<playlist::PlaylistItem>, pl_current_song: &mut usize
 ) -> bool {
     while playlist::next(pl, pl_current_song) {
         match files.get(&pl[*pl_current_song].file_idx) {
-            Some(_) => return true,
-            None    => {
+            Some(file) => {
+                *out_file = file.clone();
+                return true
+            },
+            None => {
                 pl.remove(*pl_current_song);
                 *pl_current_song -= 1;
             },

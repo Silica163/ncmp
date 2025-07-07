@@ -84,10 +84,10 @@ fn main() {
         });
     }
 
-    let mut song_idx:usize = 0;
-    while player::next(&audio_files, &mut pl, &mut song_idx) {
-        let song = audio_files.get(&(pl[song_idx].file_idx)).unwrap();
-        println!("Playing: {}", song.name);
+    let mut playlist_current_song: usize = 0;
+    let mut song: filelist::FileInfo = filelist::FileInfo::new(String::new());
+    while player::next(&audio_files, &mut song, &mut pl, &mut playlist_current_song) {
+        println!("Playing: {}", song.name.clone());
         ma_wrapper::play(song.path.clone());
         while !ma_wrapper::is_ended() {
             if *command_avaliable.lock().unwrap() {
