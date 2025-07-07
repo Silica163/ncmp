@@ -46,6 +46,18 @@ pub fn get_length_in_secs() -> i32 {
     }
 }
 
+pub fn get_cursor_in_secs() -> i32 {
+    unsafe {
+        maw_get_cursor_in_secs()
+    }
+}
+
+pub fn seek_to_sec(sec: i32) -> i32 {
+    unsafe {
+        maw_seek_to_sec(sec)
+    }
+}
+
 extern "C" {
     fn maw_init(player: *const PlayerStatus) -> c_int;
     fn maw_play(file: *const c_char) -> c_int;
@@ -53,4 +65,6 @@ extern "C" {
     fn maw_uninit();
     fn maw_get_player_status() -> *mut PlayerStatus;
     fn maw_get_length_in_secs() -> c_int;
+    fn maw_get_cursor_in_secs() -> c_int;
+    fn maw_seek_to_sec(sec: c_int) -> c_int;
 }

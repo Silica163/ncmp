@@ -71,7 +71,7 @@ int maw_init(PlayerStatus * player){
         printf("Could not init device: %d\n", result);
         return result;
     }
-    
+
     result = ma_mutex_init(&w.mutex);
     if (result != MA_SUCCESS) {
         printf("Could not init mutex: %d\n", result);
@@ -122,4 +122,36 @@ int maw_get_length_in_secs(){
     }
     int length = frames / SAMPLE_RATE;
     return length;
+}
+
+int maw_get_cursor_in_secs(){
+    ma_uint64 frames = 0;
+    ma_result r = ma_data_source_get_cursor_in_pcm_frames(&w.decoder, &frames);
+    if(r != MA_SUCCESS){
+        printf("Could not get cursor: %d\n", r);
+        return -1;
+    }
+    int cursor = frames / SAMPLE_RATE;
+    return cursor;
+}
+
+int maw_seek_to_sec(int target_sec){
+    ma_uint64 avaliable_frames = 0;
+    ma_result r = ma_data_source_get_length_in_pcm_frames(&w.decoder, &avaliable_frames);
+    if(r != MA_SUCCESS){
+        printf("Could not get length: %d\n", r);
+        return -1;
+    }
+
+    ma_uint64 target_frame = target_sec * SAMPLE_RATE;
+    if(target_frame >= avaliable_frames){
+        printf("Could not seek beyond end of data source: %u > %u\n", target_frame, avaliable_frames);
+        return -2;
+    }
+    r = ma_data_source_seek_to_pcm_frame(&w.decoder, target_frame);
+    if(r != MA_SUCCESS){
+        printf("Could not seek to %d: %d\n", target_sec, r);
+        return -3;
+    }
+    return 0;
 }
