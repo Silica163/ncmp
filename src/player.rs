@@ -65,23 +65,24 @@ fn parse_queue_command(cmd: &Vec<&str>, is_enqueue: bool) -> PlayerCommand {
         if !is_enqueue {
             return PlayerCommand::QueueRemove { with_index, index: queue_idx };
         }
-        return PlayerCommand::Empty;
+        return PlayerCommand::Error {
+            msg: format!("Expect at least one argument, but nothing is provided."),
+        }
     }
     let args = cmd[1].split(" ").collect::<Vec<&str>>();
 
     match args[0].parse::<usize>() {
         Ok(n)   => if is_enqueue { file_idx = n } else { queue_idx = n },
-        _       => {
-            println!("Expect number but got `{}`", args[0]);
-            return PlayerCommand::Empty
+        _       => return PlayerCommand::Error {
+            msg: format!("Expect number but got `{}`", args[1]),
         },
     }
 
     if args.len() > 1 && is_enqueue {
         match args[1].parse::<usize>() {
             Ok(n)   => { with_index = true; file_idx = n; },
-            _       => {
-                println!("Expect number but got `{}`", args[1]);
+            _       => return PlayerCommand::Error {
+                msg: format!("Expect number but got `{}`", args[1]),
             },
         }
     }
