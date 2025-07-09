@@ -59,7 +59,6 @@ x   -> remove any song
 IF play_queue not empty -> play until it empty
 ELSE -> play from playlist
 
-WHEN add song to queue -> remove it from playlist
 WHEN played the song in queue -> remove from queue
 
 
