@@ -25,27 +25,34 @@ pub enum PlayerCommand {
 
     // other
     Unknown { cmd: String },
+    Error { msg: String },
     Empty,
 }
 
 fn parse_remove_command(cmd: &Vec<&str>) -> PlayerCommand {
-    if cmd.len() < 2 { return PlayerCommand::Empty; }
+    if cmd.len() < 2 {
+        return PlayerCommand::Error {
+            msg: format!("Expect at least one argument, but nothing is provided."),
+        }
+    }
     match cmd[1].parse::<usize>() {
         Ok(id)  => PlayerCommand::RemoveFileById { id },
-        _       => {
-            println!("Expect number but got `{}`", cmd[1]);
-            PlayerCommand::Empty
+        _       => PlayerCommand::Error {
+            msg: format!("Expect number but got `{}`", cmd[1]),
         },
     }
 }
 
 fn parse_seek_command(cmd: &Vec<&str>) -> PlayerCommand {
-    if cmd.len() < 2 { return PlayerCommand::Empty; }
+    if cmd.len() < 2 {
+        return PlayerCommand::Error {
+            msg: format!("Expect at least one argument, but nothing is provided."),
+        }
+    }
     match cmd[1].parse::<i32>() {
         Ok(target_sec)  => PlayerCommand::Seek { target_sec },
-        _   => {
-            println!("Expect number but got `{}`", cmd[1]);
-            PlayerCommand::Empty
+        _   => PlayerCommand::Error {
+            msg: format!("Expect number but got `{}`", cmd[1]),
         },
     }
 }
@@ -159,6 +166,7 @@ pub fn execute_command(
             }
         },
         PlayerCommand::Unknown{cmd} => println!("Unknown command: {cmd}"),
+        PlayerCommand::Error{msg}   => println!("Error: {msg}"),
         PlayerCommand::Empty        => {},
     }
 }
