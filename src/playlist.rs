@@ -38,7 +38,6 @@ pub fn shuffle(files: &mut BTreeMap<usize, filelist::FileInfo>) -> Vec<PlaylistI
             avaliable_slot.remove(idx)
         };
         playlist[idx] = PlaylistItem::new(*i);
-        files.get_mut(i).unwrap().playlist_index = idx;
     }
     playlist
 }
@@ -75,4 +74,13 @@ pub fn show(playlist: &Vec<PlaylistItem>, files: &BTreeMap<usize, filelist::File
         }
     }
     println!("==============================");
+}
+
+pub fn update(playlist: &mut Vec<PlaylistItem>, files: &BTreeMap<usize, filelist::FileInfo>){
+    for (index, item) in playlist.clone().iter().enumerate() {
+        match files.get(&(item.file_idx)) {
+            Some(_) => {},
+            None => { playlist.remove(index); break; },
+        }
+    }
 }

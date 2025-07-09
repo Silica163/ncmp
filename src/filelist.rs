@@ -5,7 +5,6 @@ pub struct FileInfo {
     pub path: String,
     pub name: String,
     pub length: i32,
-    pub playlist_index: usize,
 }
 
 impl FileInfo {
@@ -14,7 +13,6 @@ impl FileInfo {
             path: path.clone(),
             name: path.rsplitn(2, "/").collect::<Vec<&str>>()[0].to_string(),
             length: 0,
-            playlist_index: 0,
         }
     }
 }
@@ -52,15 +50,13 @@ pub fn show(files: &BTreeMap<usize, FileInfo>, full_path: bool) {
     println!("==============================");
 }
 
-pub fn remove(files: &mut BTreeMap<usize, FileInfo>, id: usize) -> Option<usize> {
+pub fn remove(files: &mut BTreeMap<usize, FileInfo>, id: usize) {
     match files.remove(&id) {
         Some(file)  => {
             println!("file {} removed.", file.name);
-            Some(file.playlist_index)
         },
         None        => {
             println!("file id {id} is not exist.");
-            None
         },
     }
 }

@@ -165,10 +165,8 @@ pub fn execute_command(
         PlayerCommand::ViewPlaylist => playlist::show(pl, files),
         PlayerCommand::ViewFiles{full_path} => filelist::show(files, full_path),
         PlayerCommand::RemoveFileById{id}   => {
-            match filelist::remove(files, id){
-                Some(idx)   => { pl.remove(idx); },
-                None        => {},
-            }
+            filelist::remove(files, id);
+            playlist::update(pl, files);
         },
         PlayerCommand::Unknown{cmd} => println!("Unknown command: {cmd}"),
         PlayerCommand::Error{msg}   => println!("Error: {msg}"),
