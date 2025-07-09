@@ -38,7 +38,7 @@ fn parse_remove_command(cmd: &Vec<&str>) -> PlayerCommand {
     }
     match cmd[1].parse::<usize>() {
         Ok(id)  => PlayerCommand::RemoveFileById { id },
-        _       => PlayerCommand::Error {
+        Err(..) => PlayerCommand::Error {
             msg: format!("Expect number but got `{}`", cmd[1]),
         },
     }
@@ -52,7 +52,7 @@ fn parse_seek_command(cmd: &Vec<&str>) -> PlayerCommand {
     }
     match cmd[1].parse::<i32>() {
         Ok(target_sec)  => PlayerCommand::Seek { target_sec },
-        _   => PlayerCommand::Error {
+        Err(..)         => PlayerCommand::Error {
             msg: format!("Expect number but got `{}`", cmd[1]),
         },
     }
@@ -74,15 +74,15 @@ fn parse_queue_command(cmd: &Vec<&str>, is_enqueue: bool) -> PlayerCommand {
 
     match args[0].parse::<usize>() {
         Ok(n)   => if is_enqueue { file_idx = n } else { queue_idx = n },
-        _       => return PlayerCommand::Error {
-            msg: format!("Expect number but got `{}`", args[1]),
+        Err(..) => return PlayerCommand::Error {
+            msg: format!("Expect number but got `{}`", args[0]),
         },
     }
 
     if args.len() > 1 && is_enqueue {
         match args[1].parse::<usize>() {
             Ok(n)   => { with_index = true; file_idx = n; },
-            _       => return PlayerCommand::Error {
+            Err(..) => return PlayerCommand::Error {
                 msg: format!("Expect number but got `{}`", args[1]),
             },
         }
