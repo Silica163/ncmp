@@ -1,5 +1,3 @@
-#![allow(non_camel_case_types)]
-
 use std::env;
 use std::thread;
 use std::time;
@@ -88,15 +86,16 @@ fn main() {
 
     let mut playlist_current_song: usize = 0;
     let mut song: filelist::FileInfo = filelist::FileInfo::new(String::new());
+    let mut audio_file_idx = 0;
     let mut q: VecDeque<queue::QueueItem> = VecDeque::new();
-    while player::next(&audio_files, &mut song, &mut pl, &mut playlist_current_song, &mut q) {
+    while player::next(&audio_files, &mut song, &mut audio_file_idx, &mut pl, &mut playlist_current_song, &mut q) {
         println!("Playing: {}", song.name.clone());
         ma_wrapper::play(song.path.clone());
         while !ma_wrapper::is_ended() {
             if *command_avaliable.lock().unwrap() {
                 let mut quit = false;
                 *command_avaliable.lock().unwrap() = false;
-                player::execute_command(cmd_rx.recv().unwrap(), &mut player_status, &mut pl, &mut q, &mut audio_files, &mut quit);
+                player::execute_command(cmd_rx.recv().unwrap(), &mut player_status, &mut pl, &mut q, &mut audio_files, audio_file_idx, &mut quit);
                 quit_tx.send(quit).unwrap();
             }
             sleep!(100);

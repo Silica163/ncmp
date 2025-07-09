@@ -11,6 +11,7 @@ pub enum PlayerCommand {
     Pause,
     TogglePause,
     Seek { target_sec: i32 },
+    Info,
     Quit,
 
     // Queue
@@ -101,6 +102,7 @@ pub fn parse_command(user_input: String) -> PlayerCommand {
         "pause"     => PlayerCommand::Pause,
         "p"         => PlayerCommand::TogglePause,
         "seek"      => parse_seek_command(&cmd),
+        "info"      => PlayerCommand::Info,
         "q"         => PlayerCommand::Quit,
         "quit"      => PlayerCommand::Quit,
         "exit"      => PlayerCommand::Quit,
@@ -127,6 +129,7 @@ pub fn execute_command(
     pl: &mut Vec<playlist::PlaylistItem>,
     q: &mut VecDeque<queue::QueueItem>,
     files: &mut BTreeMap<usize, filelist::FileInfo>,
+    current_file_idx: usize,
     quit: &mut bool
 ) {
     match cmd {
@@ -134,6 +137,7 @@ pub fn execute_command(
         PlayerCommand::Pause        => ps.pause = 1,
         PlayerCommand::TogglePause  => ps.pause = !ps.pause,
         PlayerCommand::Seek{target_sec}     => { ma_wrapper::seek_to_sec(target_sec); () }
+        PlayerCommand::Info         => info(ps, current_file_idx, files),
         PlayerCommand::Quit         => *quit = true,
 
         PlayerCommand::QueueAdd { with_index, index, file_idx } => {
@@ -176,6 +180,7 @@ pub fn execute_command(
 pub fn next(
     files: &BTreeMap<usize, filelist::FileInfo>,
     out_file: &mut filelist::FileInfo,
+    out_file_idx: &mut usize,
     pl: &mut Vec<playlist::PlaylistItem>, pl_current_song: &mut usize,
     q: &mut VecDeque<queue::QueueItem>
 ) -> bool {
@@ -184,11 +189,10 @@ pub fn next(
         match files.get(&file_idx) {
             Some(file) => {
                 *out_file = file.clone();
+                *out_file_idx = file_idx;
                 return true
             },
             None => {
-                pl.remove(*pl_current_song);
-                *pl_current_song -= 1;
             },
         }
     }
@@ -196,6 +200,7 @@ pub fn next(
         match files.get(&pl[*pl_current_song].file_idx) {
             Some(file) => {
                 *out_file = file.clone();
+                *out_file_idx = file_idx;
                 return true
             },
             None => {
@@ -205,4 +210,19 @@ pub fn next(
         }
     };
     return false
+}
+
+fn info(ps: &ma_wrapper::PlayerStatus, file_idx: usize, files: &mut BTreeMap<usize, filelist::FileInfo>){
+    let file = files.get_mut(&file_idx).unwrap();
+    // TODO: unwrap will return error when playing song has been remove from filelist.
+    if file.length == 0 {
+        file.length = ma_wrapper::get_length_in_secs();
+    }
+    let cursor = ma_wrapper::get_cursor_in_secs();
+
+    println!("==============================");
+    println!("status: {}, {cursor:3}/{:3}s", if ps.pause != 0 { "pause" } else { "playing" }, file.length);
+    println!("filename: \"{}\"", file.name);
+    println!("full_path: \"{}\"", file.path);
+    println!("==============================");
 }

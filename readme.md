@@ -22,6 +22,7 @@ Internal command
 - enq, enqueue <song id> <queue index?> (add song to queue by id, position song at <queue index> if provided.)
 - deq, dequeue <queue index?> (remove song from queue by <index>, remove first song in queue if index is not provided.)
 - queue (show queue)
+- info
 - f, filelist (show filelist)
 - r, remove (remove file form filelist)
 - playlist (show playlist)
@@ -67,7 +68,7 @@ x   -> play
 x   -> pause
 x   -> seek
     -> next/prevoius song
-    -> song info
+x   -> song info
     -? volume control
 
 [ ..., previous, current, next, ... ]

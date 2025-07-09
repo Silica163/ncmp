@@ -17,6 +17,8 @@ typedef struct {
     ma_decoder decoder;
     ma_decoder_config decoder_cfg;
     ma_mutex mutex;
+
+    ma_uint64 frames;
 } Wrapper;
 
 static Wrapper w;
@@ -34,6 +36,7 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
         if(pFrameRead < frameCount){
             w.player->ended = 1;
             w.player->playing = 0;
+            w.frames = 0;
         }
     } else {
         for(int i = 0; i < frameCount; i ++){
@@ -101,6 +104,13 @@ int maw_play(const char * file){
         printf("Could not decode from '%s': %s\n", file, ma_result_description(result));
         return result;
     }
+
+    result = ma_data_source_get_length_in_pcm_frames(&w.decoder, &w.frames);
+    if(result != MA_SUCCESS){
+        printf("Could not get length: %s\n", ma_result_description(result));
+        return result;
+    }
+
     w.player->playing = 1;
     w.player->ended = 0;
     w.player->pause = 0;
@@ -116,13 +126,14 @@ PlayerStatus * maw_get_player_status(){
 }
 
 int maw_get_length_in_secs(){
-    ma_uint64 frames = 0;
-    ma_result r = ma_data_source_get_length_in_pcm_frames(&w.decoder, &frames);
-    if(r != MA_SUCCESS){
-        printf("Could not get length: %s\n", ma_result_description(r));
-        return r;
+    if(w.frames == 0) {
+        ma_result r = ma_data_source_get_length_in_pcm_frames(&w.decoder, &w.frames);
+        if(r != MA_SUCCESS){
+            printf("Could not get length: %s\n", ma_result_description(r));
+            return r;
+        }
     }
-    int length = frames / SAMPLE_RATE;
+    int length = w.frames / SAMPLE_RATE;
     return length;
 }
 
@@ -138,17 +149,21 @@ int maw_get_cursor_in_secs(){
 }
 
 int maw_seek_to_sec(int target_sec){
-    ma_uint64 avaliable_frames = 0;
-    ma_result r = ma_data_source_get_length_in_pcm_frames(&w.decoder, &avaliable_frames);
-    if(r != MA_SUCCESS){
-        printf("Could not get length: %s\n", ma_result_description(r));
-        return r;
+    ma_uint64 avaliable_frames = w.frames;
+    ma_result r;
+    if(w.frames == 0) {
+        r = ma_data_source_get_length_in_pcm_frames(&w.decoder, &avaliable_frames);
+        if(r != MA_SUCCESS){
+            printf("Could not get length: %s\n", ma_result_description(r));
+            return r;
+        }
+        w.frames = avaliable_frames;
     }
 
     ma_uint64 target_frame = target_sec * SAMPLE_RATE;
     if(target_frame >= avaliable_frames){
         printf("Could not seek beyond end of data source: %u > %u\n", target_frame, avaliable_frames);
-        return r;
+        return -1;
     }
     r = ma_data_source_seek_to_pcm_frame(&w.decoder, target_frame);
     if(r != MA_SUCCESS){

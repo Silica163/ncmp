@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 pub struct FileInfo {
     pub path: String,
     pub name: String,
-    pub length: u32,
+    pub length: i32,
     pub playlist_index: usize,
 }
 
