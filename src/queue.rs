@@ -6,15 +6,13 @@ use playlist;
 #[derive(Clone, Debug)]
 pub struct QueueItem {
     file_idx: usize,
-    playlist_index: usize,
 }
 
 impl QueueItem {
     pub fn from_file(file: (&usize, &filelist::FileInfo)) -> Self {
-        let (file_idx, file) = file;
+        let (file_idx, .. ) = file;
         Self{
             file_idx: *file_idx,
-            playlist_index: file.playlist_index,
         }
     }
 
