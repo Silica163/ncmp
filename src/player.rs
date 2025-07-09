@@ -15,7 +15,7 @@ pub enum PlayerCommand {
 
     // Queue
     QueueAdd { with_index: bool, index: usize, file_idx: usize },
-    QueueRemove { with_index: bool, index: usize, file_idx: usize },
+    QueueRemove { with_index: bool, index: usize },
     ViewQueue,
 
     // playlist/files
@@ -50,31 +50,40 @@ fn parse_seek_command(cmd: &Vec<&str>) -> PlayerCommand {
     }
 }
 
-fn parse_queue_command(cmd: &Vec<&str>) -> PlayerCommand {
-    if cmd.len() < 2 { return PlayerCommand::Empty; }
-    let args = cmd[1].split(" ").collect::<Vec<&str>>();
-    let file_idx;
+fn parse_queue_command(cmd: &Vec<&str>, is_enqueue: bool) -> PlayerCommand {
+    let mut file_idx = 0;
     let mut queue_idx = 0;
     let mut with_index = false;
+    if cmd.len() < 2 {
+        if !is_enqueue {
+            return PlayerCommand::QueueRemove { with_index, index: queue_idx };
+        }
+        return PlayerCommand::Empty;
+    }
+    let args = cmd[1].split(" ").collect::<Vec<&str>>();
+
     match args[0].parse::<usize>() {
-        Ok(id)  => file_idx = id,
+        Ok(n)   => if is_enqueue { file_idx = n } else { queue_idx = n },
         _       => {
             println!("Expect number but got `{}`", args[0]);
             return PlayerCommand::Empty
         },
     }
 
-    if args.len() > 1 {
-        with_index = true;
+    if args.len() > 1 && is_enqueue {
         match args[1].parse::<usize>() {
-            Ok(id)  => queue_idx = id,
+            Ok(n)   => { with_index = true; file_idx = n; },
             _       => {
                 println!("Expect number but got `{}`", args[1]);
-                return PlayerCommand::Empty
             },
         }
     }
-    return PlayerCommand::QueueAdd { with_index, index: queue_idx, file_idx }
+
+    if is_enqueue {
+        return PlayerCommand::QueueAdd { with_index, index: queue_idx, file_idx }
+    } else {
+        return PlayerCommand::QueueRemove { with_index, index: queue_idx }
+    }
 }
 
 pub fn parse_command(user_input: String) -> PlayerCommand {
@@ -88,10 +97,10 @@ pub fn parse_command(user_input: String) -> PlayerCommand {
         "quit"      => PlayerCommand::Quit,
         "exit"      => PlayerCommand::Quit,
 
-        "enqueue"   => parse_queue_command(&cmd),
-        "enq"       => parse_queue_command(&cmd),
-        "dequeue"   => todo!(),
-        "deq"       => todo!(),
+        "enqueue"   => parse_queue_command(&cmd, true),
+        "enq"       => parse_queue_command(&cmd, true),
+        "dequeue"   => parse_queue_command(&cmd, false),
+        "deq"       => parse_queue_command(&cmd, false),
         "queue"     => PlayerCommand::ViewQueue,
 
         "playlist"  => PlayerCommand::ViewPlaylist,
@@ -129,7 +138,16 @@ pub fn execute_command(
             }
             ()
         },
-        PlayerCommand::QueueRemove { .. } => {},
+        PlayerCommand::QueueRemove { with_index, index } => {
+            let mut queue_index = 0;
+            if with_index {
+                queue_index = index;
+            }
+            if !queue::dequeue_at(q, queue_index) {
+                println!("couldn't remove queue {queue_index}.")
+            }
+            ()
+        },
         PlayerCommand::ViewQueue => queue::show(q, files),
 
         PlayerCommand::ViewPlaylist => playlist::show(pl, files),

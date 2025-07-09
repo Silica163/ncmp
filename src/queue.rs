@@ -56,6 +56,19 @@ pub fn enqueue_at(
     true
 }
 
+// return true on success
+pub fn dequeue_at(
+    queue: &mut VecDeque<QueueItem>, queue_idx: usize
+) -> bool {
+    if queue.len() == 0 || queue_idx >= queue.len(){ return false }
+    if queue_idx == 0 {
+        queue.pop_front();
+    } else {
+        queue.remove(queue_idx);
+    }
+    true
+}
+
 pub fn show(queue: &VecDeque<QueueItem>, files: &BTreeMap<usize, filelist::FileInfo>) {
     println!("=========== queue ============");
     for (index, item) in queue.iter().enumerate() {

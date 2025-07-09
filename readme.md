@@ -3,6 +3,7 @@
 ## Feature
 
 - play, pause, seek
+- queue
 - shuffle playlist by default
 
 ## Usage
@@ -18,6 +19,9 @@ Internal command
 - pause
 - p (toggle play/pause)
 - seek <sec> (seek to <sec>)
+- enq, enqueue <song id> <queue index?> (add song to queue by id, position song at <queue index> if provided.)
+- deq, dequeue <queue index?> (remove song from queue by <index>, remove first song in queue if index is not provided.)
+- queue (show queue)
 - f, filelist (show filelist)
 - r, remove (remove file form filelist)
 - playlist (show playlist)
@@ -48,8 +52,8 @@ WHEN playlist is empty -> resuffle song_list and add it to playlist
 
 
 QUEUE
-*   -> add any song
-    -> remove any song
+x   -> add any song
+x   -> remove any song
 
 IF play_queue not empty -> play until it empty
 ELSE -> play from playlist
@@ -82,8 +86,8 @@ Player state
 
 ----- input
 cmd
-    -> enqueue
-    -> remove from queue
+x   -> enqueue
+x   -> remove from queue
     -> player command
     -> show queue
 x   -> show playlist
