@@ -1,5 +1,6 @@
 use std::time;
 use std::collections::BTreeMap;
+use std::collections::VecDeque;
 use filelist;
 
 macro_rules! time_rand {
@@ -29,8 +30,12 @@ impl PlaylistItem {
     }
 }
 
-pub fn shuffle(files: &mut BTreeMap<usize, filelist::FileInfo>) -> Vec<PlaylistItem> {
-    let mut playlist: Vec<PlaylistItem> = vec![PlaylistItem::new_empty(); files.len()];
+pub fn shuffle(files: &mut BTreeMap<usize, filelist::FileInfo>) -> VecDeque<PlaylistItem> {
+    let mut playlist: VecDeque<PlaylistItem> = VecDeque::new();
+    for _ in 0..files.len() {
+        playlist.push_back(PlaylistItem::new_empty())
+    }
+
     let mut avaliable_slot: Vec<usize> = (0..files.len()).collect();
     for i in files.clone().keys() {
         let idx = {
@@ -44,7 +49,7 @@ pub fn shuffle(files: &mut BTreeMap<usize, filelist::FileInfo>) -> Vec<PlaylistI
 
 // get next song
 // return false when playlist is ended
-pub fn next(playlist: &mut Vec<PlaylistItem>, current_song: &mut usize) -> bool {
+pub fn next(playlist: &mut VecDeque<PlaylistItem>, current_song: &mut usize) -> bool {
     let mut next_song = *current_song;
     for _ in 0..(playlist.len()+1) {
         if !playlist[next_song].played {
@@ -57,7 +62,7 @@ pub fn next(playlist: &mut Vec<PlaylistItem>, current_song: &mut usize) -> bool 
     return false
 }
 
-pub fn is_ended(playlist: &Vec<PlaylistItem>) -> bool {
+pub fn is_ended(playlist: &VecDeque<PlaylistItem>) -> bool {
     for item in playlist {
         if item.played { continue }
         return false
@@ -65,7 +70,7 @@ pub fn is_ended(playlist: &Vec<PlaylistItem>) -> bool {
     return true
 }
 
-pub fn show(playlist: &Vec<PlaylistItem>, files: &BTreeMap<usize, filelist::FileInfo>){
+pub fn show(playlist: &VecDeque<PlaylistItem>, files: &BTreeMap<usize, filelist::FileInfo>){
     println!("========== playlist ==========");
     for (index, item) in playlist.iter().enumerate() {
         match files.get(&(item.file_idx)) {
@@ -76,7 +81,7 @@ pub fn show(playlist: &Vec<PlaylistItem>, files: &BTreeMap<usize, filelist::File
     println!("==============================");
 }
 
-pub fn update(playlist: &mut Vec<PlaylistItem>, files: &BTreeMap<usize, filelist::FileInfo>){
+pub fn update(playlist: &mut VecDeque<PlaylistItem>, files: &BTreeMap<usize, filelist::FileInfo>){
     for (index, item) in playlist.clone().iter().enumerate() {
         match files.get(&(item.file_idx)) {
             Some(_) => {},
