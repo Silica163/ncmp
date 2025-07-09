@@ -49,25 +49,11 @@ pub fn shuffle(files: &mut BTreeMap<usize, filelist::FileInfo>) -> VecDeque<Play
 
 // get next song
 // return false when playlist is ended
-pub fn next(playlist: &mut VecDeque<PlaylistItem>, current_song: &mut usize) -> bool {
-    let mut next_song = *current_song;
-    for _ in 0..(playlist.len()+1) {
-        if !playlist[next_song].played {
-            *current_song = next_song;
-            playlist[next_song].played = true;
-            return true
-        }
-        next_song = (next_song + 1) % playlist.len();
+pub fn next(playlist: &mut VecDeque<PlaylistItem>, file_idx: &mut usize) -> bool {
+    match playlist.pop_front() {
+        Some(song)  => {*file_idx = song.file_idx; true },
+        None        => false,
     }
-    return false
-}
-
-pub fn is_ended(playlist: &VecDeque<PlaylistItem>) -> bool {
-    for item in playlist {
-        if item.played { continue }
-        return false
-    }
-    return true
 }
 
 pub fn show(playlist: &VecDeque<PlaylistItem>, files: &BTreeMap<usize, filelist::FileInfo>){

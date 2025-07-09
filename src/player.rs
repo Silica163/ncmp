@@ -179,7 +179,7 @@ pub fn next(
     files: &BTreeMap<usize, filelist::FileInfo>,
     out_file: &mut filelist::FileInfo,
     out_file_idx: &mut usize,
-    pl: &mut VecDeque<playlist::PlaylistItem>, pl_current_song: &mut usize,
+    pl: &mut VecDeque<playlist::PlaylistItem>,
     q: &mut VecDeque<queue::QueueItem>
 ) -> bool {
     let mut file_idx = 0;
@@ -194,16 +194,14 @@ pub fn next(
             },
         }
     }
-    while playlist::next(pl, pl_current_song) {
-        match files.get(&pl[*pl_current_song].file_idx) {
+    while playlist::next(pl, &mut file_idx) {
+        match files.get(&file_idx) {
             Some(file) => {
                 *out_file = file.clone();
                 *out_file_idx = file_idx;
                 return true
             },
             None => {
-                pl.remove(*pl_current_song);
-                *pl_current_song -= 1;
             },
         }
     };
