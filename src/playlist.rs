@@ -27,8 +27,7 @@ impl PlaylistItem {
     }
 }
 
-pub fn shuffle(files: &mut BTreeMap<usize, filelist::FileInfo>) -> VecDeque<PlaylistItem> {
-    let mut playlist: VecDeque<PlaylistItem> = VecDeque::new();
+pub fn re_shuffle(files: &mut BTreeMap<usize, filelist::FileInfo>, playlist: &mut VecDeque<PlaylistItem>) {
     for _ in 0..files.len() {
         playlist.push_back(PlaylistItem::new_empty())
     }
@@ -41,6 +40,11 @@ pub fn shuffle(files: &mut BTreeMap<usize, filelist::FileInfo>) -> VecDeque<Play
         };
         playlist[idx] = PlaylistItem::new(*i);
     }
+}
+
+pub fn shuffle(files: &mut BTreeMap<usize, filelist::FileInfo>) -> VecDeque<PlaylistItem> {
+    let mut playlist: VecDeque<PlaylistItem> = VecDeque::new();
+    re_shuffle(files, &mut playlist);
     playlist
 }
 
