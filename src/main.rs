@@ -10,11 +10,13 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::mpsc::channel;
 use std::collections::BTreeMap;
+use std::collections::VecDeque;
 
 pub mod ma_wrapper;
 pub mod player;
 pub mod playlist;
 pub mod filelist;
+pub mod queue;
 
 
 use filelist::*;
@@ -86,6 +88,8 @@ fn main() {
 
     let mut playlist_current_song: usize = 0;
     let mut song: filelist::FileInfo = filelist::FileInfo::new(String::new());
+    let mut q: VecDeque<queue::QueueItem> = VecDeque::new();
+    q.push_back(queue::QueueItem::from_file_idx(0, &audio_files));
     while player::next(&audio_files, &mut song, &mut pl, &mut playlist_current_song) {
         println!("Playing: {}", song.name.clone());
         ma_wrapper::play(song.path.clone());
@@ -93,7 +97,7 @@ fn main() {
             if *command_avaliable.lock().unwrap() {
                 let mut quit = false;
                 *command_avaliable.lock().unwrap() = false;
-                player::execute_command(cmd_rx.recv().unwrap(), &mut player_status, &mut pl, &mut audio_files, &mut quit);
+                player::execute_command(cmd_rx.recv().unwrap(), &mut player_status, &mut pl, &mut q, &mut audio_files, &mut quit);
                 quit_tx.send(quit).unwrap();
             }
             sleep!(100);

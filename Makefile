@@ -4,7 +4,8 @@ RSS=\
 	$(SRC)/player.rs \
 	$(SRC)/ma_wrapper.rs \
 	$(SRC)/playlist.rs \
-	$(SRC)/filelist.rs
+	$(SRC)/filelist.rs \
+	$(SRC)/queue.rs
 
 OBJS=\
 	 $(BUILD)/ma_wrapper.o \

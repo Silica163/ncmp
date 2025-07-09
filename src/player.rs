@@ -1,7 +1,9 @@
 use std::collections::BTreeMap;
+use std::collections::VecDeque;
 use ma_wrapper;
 use playlist;
 use filelist;
+use queue;
 
 pub enum PlayerCommand {
     // player
@@ -10,6 +12,11 @@ pub enum PlayerCommand {
     TogglePause,
     Seek { target_sec: i32 },
     Quit,
+
+    // Queue
+    QueueAdd { with_index: bool, index: usize },
+    QueueRemove { with_index: bool, index: usize },
+    ViewQueue,
 
     // playlist/files
     ViewPlaylist,
@@ -67,6 +74,7 @@ pub fn execute_command(
     cmd: PlayerCommand,
     ps: &mut ma_wrapper::PlayerStatus,
     pl: &mut Vec<playlist::PlaylistItem>,
+    q: &mut VecDeque<queue::QueueItem>,
     files: &mut BTreeMap<usize, filelist::FileInfo>,
     quit: &mut bool
 ) {
@@ -76,6 +84,9 @@ pub fn execute_command(
         PlayerCommand::TogglePause  => ps.pause = !ps.pause,
         PlayerCommand::Seek{target_sec}     => { ma_wrapper::seek_to_sec(target_sec); () },
         PlayerCommand::Quit         => *quit = true,
+        PlayerCommand::QueueAdd { .. } => {},
+        PlayerCommand::QueueRemove { .. } => {},
+        PlayerCommand::ViewQueue => queue::show(q, files),
         PlayerCommand::ViewPlaylist => playlist::show(pl, files),
         PlayerCommand::ViewFiles{full_path} => filelist::show(files, full_path),
         PlayerCommand::RemoveFileById{id}   => {
@@ -89,6 +100,7 @@ pub fn execute_command(
     }
 }
 
+// return false when playlist and queue ended
 pub fn next(
     files: &BTreeMap<usize, filelist::FileInfo>,
     out_file: &mut filelist::FileInfo,
