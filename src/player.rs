@@ -126,7 +126,7 @@ pub fn parse_command(user_input: String) -> PlayerCommand {
 pub fn execute_command(
     cmd: PlayerCommand,
     ps: &mut ma_wrapper::PlayerStatus,
-    pl: &mut VecDeque<playlist::PlaylistItem>,
+    pl: &mut VecDeque<usize>,
     q: &mut VecDeque<queue::QueueItem>,
     files: &mut BTreeMap<usize, filelist::FileInfo>,
     current_file_idx: usize,
@@ -179,7 +179,7 @@ pub fn next(
     files: &BTreeMap<usize, filelist::FileInfo>,
     out_file: &mut filelist::FileInfo,
     out_file_idx: &mut usize,
-    pl: &mut VecDeque<playlist::PlaylistItem>,
+    pl: &mut VecDeque<usize>,
     q: &mut VecDeque<queue::QueueItem>
 ) -> bool {
     let mut file_idx = 0;

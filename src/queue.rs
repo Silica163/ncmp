@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
 use filelist;
-use playlist;
 
 #[derive(Clone, Debug)]
 pub struct QueueItem {
@@ -18,10 +17,6 @@ impl QueueItem {
 
     pub fn from_file_idx(file_idx: usize, files: &BTreeMap<usize, filelist::FileInfo>) -> Self {
         Self::from_file(files.get_key_value(&file_idx).unwrap())
-    }
-
-    pub fn from_playlist(playlist_item: &playlist::PlaylistItem, files: &BTreeMap<usize, filelist::FileInfo>) -> Self {
-        Self::from_file(files.get_key_value(&playlist_item.file_idx).unwrap())
     }
 }
 
