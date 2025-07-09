@@ -12,20 +12,17 @@ macro_rules! time_rand {
 #[derive(Debug, Clone)]
 pub struct PlaylistItem {
     pub file_idx: usize,
-    pub played: bool,
 }
 
 impl PlaylistItem {
     pub fn new_empty() -> Self {
         Self {
             file_idx: 0,
-            played: false,
         }
     }
     pub fn new(idx: usize) -> Self {
         Self {
             file_idx: idx,
-            played: false,
         }
     }
 }
