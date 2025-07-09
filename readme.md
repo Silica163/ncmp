@@ -20,7 +20,7 @@ Internal command
 - p (toggle play/pause)
 - seek <sec> (seek to <sec>)
 - enq, enqueue <song id> <queue index?> (add song to queue by id, position song at <queue index> if provided.)
-- deq, dequeue <queue index?> (remove song from queue by <index>, remove first song in queue if index is not provided.)
+- deq, dequeue <queue index?> (remove song from queue by \<index\>, remove first song in queue if index is not provided.)
 - queue (show queue)
 - info
 - f, filelist (show filelist)
