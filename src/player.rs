@@ -14,8 +14,8 @@ pub enum PlayerCommand {
     Quit,
 
     // Queue
-    QueueAdd { with_index: bool, index: usize },
-    QueueRemove { with_index: bool, index: usize },
+    QueueAdd { with_index: bool, index: usize, file_idx: usize },
+    QueueRemove { with_index: bool, index: usize, file_idx: usize },
     ViewQueue,
 
     // playlist/files
@@ -50,6 +50,33 @@ fn parse_seek_command(cmd: &Vec<&str>) -> PlayerCommand {
     }
 }
 
+fn parse_queue_command(cmd: &Vec<&str>) -> PlayerCommand {
+    if cmd.len() < 2 { return PlayerCommand::Empty; }
+    let args = cmd[1].split(" ").collect::<Vec<&str>>();
+    let file_idx;
+    let mut queue_idx = 0;
+    let mut with_index = false;
+    match args[0].parse::<usize>() {
+        Ok(id)  => file_idx = id,
+        _       => {
+            println!("Expect number but got `{}`", args[0]);
+            return PlayerCommand::Empty
+        },
+    }
+
+    if args.len() > 1 {
+        with_index = true;
+        match args[1].parse::<usize>() {
+            Ok(id)  => queue_idx = id,
+            _       => {
+                println!("Expect number but got `{}`", args[1]);
+                return PlayerCommand::Empty
+            },
+        }
+    }
+    return PlayerCommand::QueueAdd { with_index, index: queue_idx, file_idx }
+}
+
 pub fn parse_command(user_input: String) -> PlayerCommand {
     let cmd: Vec<&str> = user_input.trim_start().splitn(2, " ").collect();
     match cmd[0] {
@@ -60,6 +87,13 @@ pub fn parse_command(user_input: String) -> PlayerCommand {
         "q"         => PlayerCommand::Quit,
         "quit"      => PlayerCommand::Quit,
         "exit"      => PlayerCommand::Quit,
+
+        "enqueue"   => parse_queue_command(&cmd),
+        "enq"       => parse_queue_command(&cmd),
+        "dequeue"   => todo!(),
+        "deq"       => todo!(),
+        "queue"     => PlayerCommand::ViewQueue,
+
         "playlist"  => PlayerCommand::ViewPlaylist,
         "files"     => PlayerCommand::ViewFiles { full_path: true },
         "f"         => PlayerCommand::ViewFiles { full_path: false},
@@ -82,11 +116,22 @@ pub fn execute_command(
         PlayerCommand::Play         => ps.pause = 0,
         PlayerCommand::Pause        => ps.pause = 1,
         PlayerCommand::TogglePause  => ps.pause = !ps.pause,
-        PlayerCommand::Seek{target_sec}     => { ma_wrapper::seek_to_sec(target_sec); () },
+        PlayerCommand::Seek{target_sec}     => { ma_wrapper::seek_to_sec(target_sec); () }
         PlayerCommand::Quit         => *quit = true,
-        PlayerCommand::QueueAdd { .. } => {},
+
+        PlayerCommand::QueueAdd { with_index, index, file_idx } => {
+            let mut queue_index = q.len();
+            if with_index {
+                queue_index = index
+            }
+            if !queue::enqueue_at(q, queue_index, file_idx, files) {
+                println!("file id {file_idx:3} does not exist.")
+            }
+            ()
+        },
         PlayerCommand::QueueRemove { .. } => {},
         PlayerCommand::ViewQueue => queue::show(q, files),
+
         PlayerCommand::ViewPlaylist => playlist::show(pl, files),
         PlayerCommand::ViewFiles{full_path} => filelist::show(files, full_path),
         PlayerCommand::RemoveFileById{id}   => {
@@ -104,8 +149,22 @@ pub fn execute_command(
 pub fn next(
     files: &BTreeMap<usize, filelist::FileInfo>,
     out_file: &mut filelist::FileInfo,
-    pl: &mut Vec<playlist::PlaylistItem>, pl_current_song: &mut usize
+    pl: &mut Vec<playlist::PlaylistItem>, pl_current_song: &mut usize,
+    q: &mut VecDeque<queue::QueueItem>
 ) -> bool {
+    let mut file_idx = 0;
+    if queue::next(q, &mut file_idx) {
+        match files.get(&file_idx) {
+            Some(file) => {
+                *out_file = file.clone();
+                return true
+            },
+            None => {
+                pl.remove(*pl_current_song);
+                *pl_current_song -= 1;
+            },
+        }
+    }
     while playlist::next(pl, pl_current_song) {
         match files.get(&pl[*pl_current_song].file_idx) {
             Some(file) => {

@@ -27,6 +27,7 @@ impl QueueItem {
     }
 }
 
+// return false when queue is empty
 pub fn next(queue: &mut VecDeque<QueueItem>, file_idx: &mut usize) -> bool {
     match queue.pop_front() {
         Some(item) => {
@@ -35,6 +36,24 @@ pub fn next(queue: &mut VecDeque<QueueItem>, file_idx: &mut usize) -> bool {
         },
         None => false,
     }
+}
+
+// return true on success
+pub fn enqueue_at(
+    queue: &mut VecDeque<QueueItem>, queue_idx: usize,
+    file_idx: usize, files: &BTreeMap<usize, filelist::FileInfo>
+) -> bool {
+    let file;
+    match files.get_key_value(&file_idx) {
+        Some(f) => file = f,
+        None    => return false,
+    }
+    if queue_idx >= queue.len() {
+        queue.push_back(QueueItem::from_file(file));
+    } else {
+        queue.insert(queue_idx, QueueItem::from_file(file));
+    }
+    true
 }
 
 pub fn show(queue: &VecDeque<QueueItem>, files: &BTreeMap<usize, filelist::FileInfo>) {

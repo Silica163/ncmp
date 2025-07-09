@@ -89,8 +89,7 @@ fn main() {
     let mut playlist_current_song: usize = 0;
     let mut song: filelist::FileInfo = filelist::FileInfo::new(String::new());
     let mut q: VecDeque<queue::QueueItem> = VecDeque::new();
-    q.push_back(queue::QueueItem::from_file_idx(0, &audio_files));
-    while player::next(&audio_files, &mut song, &mut pl, &mut playlist_current_song) {
+    while player::next(&audio_files, &mut song, &mut pl, &mut playlist_current_song, &mut q) {
         println!("Playing: {}", song.name.clone());
         ma_wrapper::play(song.path.clone());
         while !ma_wrapper::is_ended() {

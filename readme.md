@@ -48,7 +48,7 @@ WHEN playlist is empty -> resuffle song_list and add it to playlist
 
 
 QUEUE
-    -> add any song
+*   -> add any song
     -> remove any song
 
 IF play_queue not empty -> play until it empty
