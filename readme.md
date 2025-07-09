@@ -32,7 +32,7 @@ Internal command
 - [x] play song from command line argument
 - [x] play/pause a song with program command
 - [x] playlist
-- [ ] queue
+- [x] queue
 - [ ] next/previous
 
 <details>
@@ -89,7 +89,7 @@ cmd
 x   -> enqueue
 x   -> remove from queue
     -> player command
-    -> show queue
+x   -> show queue
 x   -> show playlist
 x   -> show song list
 
