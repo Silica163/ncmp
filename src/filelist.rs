@@ -32,7 +32,7 @@ pub fn scan_and_sort_path(paths: Vec<String>, files: &mut BTreeMap<usize, FileIn
 
 pub fn scan_path(path: String, files: &mut Vec<String>) -> Option<()> {
     let path_type = fs::symlink_metadata(&path).ok()?.file_type();
-    if path_type.is_symlink() { println!("{} how to scan symlink?", path); return Some(()) }
+    if path_type.is_symlink() { println!("{} todo: how to scan symlink?", path); return Some(()) }
     if path_type.is_dir() {
         for entry in fs::read_dir(&path).ok()? {
             scan_path(entry.ok()?.path().display().to_string(), files)?;
