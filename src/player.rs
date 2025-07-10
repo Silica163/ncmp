@@ -160,9 +160,9 @@ pub fn execute_command(
             }
             ()
         },
-        PlayerCommand::ViewQueue => queue::show(q, files),
+        PlayerCommand::ViewQueue => show(q, files, "queue"),
 
-        PlayerCommand::ViewPlaylist => playlist::show(pl, files),
+        PlayerCommand::ViewPlaylist => show(pl, files, "playlist"),
         PlayerCommand::ViewFiles{full_path} => filelist::show(files, full_path),
         PlayerCommand::RemoveFileById{id}   => {
             filelist::remove(files, id);
@@ -220,5 +220,16 @@ fn info(ps: &ma_wrapper::PlayerStatus, file_idx: usize, files: &mut BTreeMap<usi
     println!("status: {}, {cursor:3}/{:3}s", if ps.pause != 0 { "pause" } else { "playing" }, file.length);
     println!("filename: \"{}\"", file.name);
     println!("full_path: \"{}\"", file.path);
+    println!("==============================");
+}
+
+fn show(vdq: &VecDeque<usize>, files: &BTreeMap<usize, filelist::FileInfo>, s: &str) {
+    println!("=========={:^10}==========", s);
+    for (index, file_idx) in vdq.iter().enumerate() {
+        match files.get(&file_idx) {
+            Some(file) => println!("{index:03}: {}", file.name),
+            None => { println!("file id {index:03} is not exists in file list.")},
+        }
+    }
     println!("==============================");
 }

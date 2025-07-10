@@ -39,14 +39,3 @@ pub fn dequeue_at(
     }
     true
 }
-
-pub fn show(queue: &VecDeque<usize>, files: &BTreeMap<usize, filelist::FileInfo>) {
-    println!("=========== queue ============");
-    for (index, file_idx) in queue.iter().enumerate() {
-        match files.get(&file_idx) {
-            Some(file) => println!("{index:03}: {}", file.name),
-            None => { println!("file id {index:03} is not exists in file list.")},
-        }
-    }
-    println!("==============================");
-}

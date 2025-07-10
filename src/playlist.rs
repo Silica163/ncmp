@@ -39,17 +39,6 @@ pub fn next(playlist: &mut VecDeque<usize>, file_idx: &mut usize) -> bool {
     }
 }
 
-pub fn show(playlist: &VecDeque<usize>, files: &BTreeMap<usize, filelist::FileInfo>){
-    println!("========== playlist ==========");
-    for (playlist_index, file_idx) in playlist.iter().enumerate() {
-        match files.get(&(file_idx)) {
-            Some(file) => println!("{playlist_index:03}: {}", file.name),
-            None => { println!("file id {playlist_index:03} is not exists in file list.")},
-        }
-    }
-    println!("==============================");
-}
-
 pub fn update(playlist: &mut VecDeque<usize>, files: &BTreeMap<usize, filelist::FileInfo>){
     for (playlist_index, file_idx) in playlist.clone().iter().enumerate() {
         match files.get(&(file_idx)) {
