@@ -75,6 +75,8 @@ x   -> song info
 played list
     -> add last
     -> remove last
+    -> STACK like
+    -> WHAT HAPPEN if song is not in song_list?
 
 
 ----- data
