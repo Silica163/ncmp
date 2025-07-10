@@ -127,7 +127,7 @@ pub fn execute_command(
     cmd: PlayerCommand,
     ps: &mut ma_wrapper::PlayerStatus,
     pl: &mut VecDeque<usize>,
-    q: &mut VecDeque<queue::QueueItem>,
+    q: &mut VecDeque<usize>,
     files: &mut BTreeMap<usize, filelist::FileInfo>,
     current_file_idx: usize,
     quit: &mut bool
@@ -180,7 +180,7 @@ pub fn next(
     out_file: &mut filelist::FileInfo,
     out_file_idx: &mut usize,
     pl: &mut VecDeque<usize>,
-    q: &mut VecDeque<queue::QueueItem>
+    q: &mut VecDeque<usize>
 ) -> bool {
     let mut file_idx = 0;
     if queue::next(q, &mut file_idx) {

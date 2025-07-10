@@ -2,29 +2,11 @@ use std::collections::BTreeMap;
 use std::collections::VecDeque;
 use filelist;
 
-#[derive(Clone, Debug)]
-pub struct QueueItem {
-    file_idx: usize,
-}
-
-impl QueueItem {
-    pub fn from_file(file: (&usize, &filelist::FileInfo)) -> Self {
-        let (file_idx, .. ) = file;
-        Self{
-            file_idx: *file_idx,
-        }
-    }
-
-    pub fn from_file_idx(file_idx: usize, files: &BTreeMap<usize, filelist::FileInfo>) -> Self {
-        Self::from_file(files.get_key_value(&file_idx).unwrap())
-    }
-}
-
 // return false when queue is empty
-pub fn next(queue: &mut VecDeque<QueueItem>, file_idx: &mut usize) -> bool {
+pub fn next(queue: &mut VecDeque<usize>, file_idx: &mut usize) -> bool {
     match queue.pop_front() {
         Some(item) => {
-            *file_idx = item.file_idx;
+            *file_idx = item;
             true
         },
         None => false,
@@ -33,25 +15,21 @@ pub fn next(queue: &mut VecDeque<QueueItem>, file_idx: &mut usize) -> bool {
 
 // return true on success
 pub fn enqueue_at(
-    queue: &mut VecDeque<QueueItem>, queue_idx: usize,
+    queue: &mut VecDeque<usize>, queue_idx: usize,
     file_idx: usize, files: &BTreeMap<usize, filelist::FileInfo>
 ) -> bool {
-    let file;
-    match files.get_key_value(&file_idx) {
-        Some(f) => file = f,
-        None    => return false,
-    }
+    if !files.contains_key(&file_idx){ return false }
     if queue_idx >= queue.len() {
-        queue.push_back(QueueItem::from_file(file));
+        queue.push_back(file_idx);
     } else {
-        queue.insert(queue_idx, QueueItem::from_file(file));
+        queue.insert(queue_idx, file_idx);
     }
     true
 }
 
 // return true on success
 pub fn dequeue_at(
-    queue: &mut VecDeque<QueueItem>, queue_idx: usize
+    queue: &mut VecDeque<usize>, queue_idx: usize
 ) -> bool {
     if queue.len() == 0 || queue_idx >= queue.len(){ return false }
     if queue_idx == 0 {
@@ -62,10 +40,10 @@ pub fn dequeue_at(
     true
 }
 
-pub fn show(queue: &VecDeque<QueueItem>, files: &BTreeMap<usize, filelist::FileInfo>) {
+pub fn show(queue: &VecDeque<usize>, files: &BTreeMap<usize, filelist::FileInfo>) {
     println!("=========== queue ============");
-    for (index, item) in queue.iter().enumerate() {
-        match files.get(&(item.file_idx)) {
+    for (index, file_idx) in queue.iter().enumerate() {
+        match files.get(&file_idx) {
             Some(file) => println!("{index:03}: {}", file.name),
             None => { println!("file id {index:03} is not exists in file list.")},
         }
