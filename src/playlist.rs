@@ -38,12 +38,3 @@ pub fn next(playlist: &mut VecDeque<usize>, file_idx: &mut usize) -> bool {
         None        => false,
     }
 }
-
-pub fn update(playlist: &mut VecDeque<usize>, files: &BTreeMap<usize, filelist::FileInfo>){
-    for (playlist_index, file_idx) in playlist.clone().iter().enumerate() {
-        match files.get(&(file_idx)) {
-            Some(_) => {},
-            None => { playlist.remove(playlist_index); break; },
-        }
-    }
-}

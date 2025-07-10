@@ -166,7 +166,8 @@ pub fn execute_command(
         PlayerCommand::ViewFiles{full_path} => filelist::show(files, full_path),
         PlayerCommand::RemoveFileById{id}   => {
             filelist::remove(files, id);
-            playlist::update(pl, files);
+            update(pl, files);
+            update(q, files);
         },
         PlayerCommand::Unknown{cmd} => println!("Unknown command: {cmd}"),
         PlayerCommand::Error{msg}   => println!("Error: {msg}"),
@@ -232,4 +233,13 @@ fn show(vdq: &VecDeque<usize>, files: &BTreeMap<usize, filelist::FileInfo>, s: &
         }
     }
     println!("==============================");
+}
+
+fn update(vdq: &mut VecDeque<usize>, files: &BTreeMap<usize, filelist::FileInfo>){
+    for (index, file_idx) in vdq.clone().iter().enumerate() {
+        match files.get(&(file_idx)) {
+            Some(_) => {},
+            None => { vdq.remove(index); break; },
+        }
+    }
 }
