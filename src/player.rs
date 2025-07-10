@@ -4,6 +4,7 @@ use ma_wrapper;
 use playlist;
 use filelist;
 use queue;
+use history;
 
 pub enum PlayerCommand {
     // player
@@ -18,6 +19,11 @@ pub enum PlayerCommand {
     QueueAdd { with_index: bool, index: usize, file_idx: usize },
     QueueRemove { with_index: bool, index: usize },
     ViewQueue,
+
+    // History
+    Next,
+    Previous,
+    ViewHistory,
 
     // playlist/files
     ViewPlaylist,
@@ -113,6 +119,12 @@ pub fn parse_command(user_input: String) -> PlayerCommand {
         "deq"       => parse_queue_command(&cmd, false),
         "queue"     => PlayerCommand::ViewQueue,
 
+        "next"      => PlayerCommand::Next,
+        "previous"  => PlayerCommand::Previous,
+        "prev"      => PlayerCommand::Previous,
+        "history"   => PlayerCommand::ViewHistory,
+        "hist"      => PlayerCommand::ViewHistory,
+
         "playlist"  => PlayerCommand::ViewPlaylist,
         "files"     => PlayerCommand::ViewFiles { full_path: true },
         "f"         => PlayerCommand::ViewFiles { full_path: false},
@@ -128,6 +140,7 @@ pub fn execute_command(
     ps: &mut ma_wrapper::PlayerStatus,
     pl: &mut VecDeque<usize>,
     q: &mut VecDeque<usize>,
+    hist: &mut VecDeque<usize>,
     files: &mut BTreeMap<usize, filelist::FileInfo>,
     current_file_idx: usize,
     quit: &mut bool
@@ -136,7 +149,7 @@ pub fn execute_command(
         PlayerCommand::Play         => ps.pause = 0,
         PlayerCommand::Pause        => ps.pause = 1,
         PlayerCommand::TogglePause  => ps.pause = !ps.pause,
-        PlayerCommand::Seek{target_sec}     => { ma_wrapper::seek_to_sec(target_sec); () }
+        PlayerCommand::Seek{target_sec}     => { ma_wrapper::seek_to_sec(target_sec); () },
         PlayerCommand::Info         => info(ps, current_file_idx, files),
         PlayerCommand::Quit         => *quit = true,
 
@@ -162,6 +175,15 @@ pub fn execute_command(
         },
         PlayerCommand::ViewQueue => show(q, files, "queue"),
 
+        PlayerCommand::Next         => {
+            ps.pause = 1;
+            ps.playing = 0;
+            ps.ended = 1;
+        },
+        PlayerCommand::Previous     => {
+        },
+        PlayerCommand::ViewHistory  => show(hist, files, "history"),
+
         PlayerCommand::ViewPlaylist => show(pl, files, "playlist"),
         PlayerCommand::ViewFiles{full_path} => filelist::show(files, full_path),
         PlayerCommand::RemoveFileById{id}   => {
@@ -181,7 +203,7 @@ pub fn next(
     out_file: &mut filelist::FileInfo,
     out_file_idx: &mut usize,
     pl: &mut VecDeque<usize>,
-    q: &mut VecDeque<usize>
+    q: &mut VecDeque<usize>,
 ) -> bool {
     let mut file_idx = 0;
     if queue::next(q, &mut file_idx) {

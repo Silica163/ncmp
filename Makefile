@@ -5,7 +5,8 @@ RSS=\
 	$(SRC)/ma_wrapper.rs \
 	$(SRC)/playlist.rs \
 	$(SRC)/filelist.rs \
-	$(SRC)/queue.rs
+	$(SRC)/queue.rs \
+	$(SRC)/history.rs
 
 OBJS=\
 	 $(BUILD)/ma_wrapper.o \

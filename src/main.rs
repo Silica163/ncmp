@@ -15,6 +15,7 @@ pub mod player;
 pub mod playlist;
 pub mod filelist;
 pub mod queue;
+pub mod history;
 
 
 use filelist::*;
@@ -85,20 +86,35 @@ fn main() {
     }
 
     let mut song: filelist::FileInfo = filelist::FileInfo::new(String::new());
-    let mut audio_file_idx = 0;
+    let mut current_file_idx = 0;
     let mut q: VecDeque<usize> = VecDeque::new();
-    while player::next(&audio_files, &mut song, &mut audio_file_idx, &mut pl, &mut q) {
+    let mut hist: VecDeque<usize> = VecDeque::new();
+    while player::next(
+        &audio_files,
+        &mut song, &mut current_file_idx,
+        &mut pl,
+        &mut q,
+    ){
         println!("Playing: {}", song.name.clone());
         ma_wrapper::play(song.path.clone());
         while !ma_wrapper::is_ended() {
             if *command_avaliable.lock().unwrap() {
                 let mut quit = false;
                 *command_avaliable.lock().unwrap() = false;
-                player::execute_command(cmd_rx.recv().unwrap(), &mut player_status, &mut pl, &mut q, &mut audio_files, audio_file_idx, &mut quit);
+                player::execute_command(
+                    cmd_rx.recv().unwrap(),
+                    &mut player_status,
+                    &mut pl,
+                    &mut q,
+                    &mut hist,
+                    &mut audio_files, current_file_idx,
+                    &mut quit
+                );
                 quit_tx.send(quit).unwrap();
             }
             sleep!(100);
         }
+        history::add(&mut hist, current_file_idx);
     }
     try_exit();
 }
