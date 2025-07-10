@@ -120,6 +120,7 @@ pub fn parse_command(user_input: String) -> PlayerCommand {
         "queue"     => PlayerCommand::ViewQueue,
 
         "next"      => PlayerCommand::Next,
+        "n"         => PlayerCommand::Next,
         "previous"  => PlayerCommand::Previous,
         "prev"      => PlayerCommand::Previous,
         "history"   => PlayerCommand::ViewHistory,
