@@ -3,7 +3,9 @@
 ## Feature
 
 - play, pause, seek
+- skip to next song, play previous song
 - queue
+- played history
 - shuffle playlist by default
 
 ## Usage
@@ -26,6 +28,9 @@ Internal command
 - f, filelist (show filelist)
 - r, remove (remove file form filelist)
 - playlist (show playlist)
+- hist, history
+- next, n
+- previous, prev
 - q, exit, quit
 
 ## Developement plan
@@ -34,7 +39,7 @@ Internal command
 - [x] play/pause a song with program command
 - [x] playlist
 - [x] queue
-- [ ] next/previous
+- [x] next/previous
 
 <details>
 <summary>More details...</summary>
@@ -66,16 +71,15 @@ PLAYER
 x   -> play
 x   -> pause
 x   -> seek
-    -> next/prevoius song
+x   -> next/prevoius song
 x   -> song info
     -? volume control
 
 [ ..., previous, current, next, ... ]
 [played        ]          [ queue ][ playlist ]
 played list
-    -> add last
-    -> remove last
-    -> STACK like
+x   -> add last
+x   -> remove last
     -> WHAT HAPPEN if song is not in song_list?
 
 
