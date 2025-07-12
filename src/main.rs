@@ -64,7 +64,7 @@ fn main() {
     ma_wrapper::init(&player_status);
 
     let command_avaliable = Arc::new(Mutex::new(false));
-    let (cmd_tx, cmd_rx) = channel::<player::PlayerCommand>();
+    let (cmd_tx, cmd_rx) = channel::<player::Command>();
     let (quit_tx, quit_rx) = channel::<bool>();
     {
         let thread_command_avaliable = Arc::clone(&command_avaliable);
@@ -108,13 +108,13 @@ fn main() {
                     &mut audio_files, current_file_idx
                 ) {
                     // TODO: merge quit_tx.send(false) together
-                    player::PlayerCommandInterrupt::None    => quit_tx.send(false).unwrap(),
-                    player::PlayerCommandInterrupt::Quit    => {
+                    player::CommandInterrupt::None    => quit_tx.send(false).unwrap(),
+                    player::CommandInterrupt::Quit    => {
                         quit_tx.send(true).unwrap();
                         break 'outer;
                     },
-                    player::PlayerCommandInterrupt::Next    => { quit_tx.send(false).unwrap(); break },
-                    player::PlayerCommandInterrupt::Previous=> { quit_tx.send(false).unwrap(); go_previous = true; break },
+                    player::CommandInterrupt::Next    => { quit_tx.send(false).unwrap(); break },
+                    player::CommandInterrupt::Previous=> { quit_tx.send(false).unwrap(); go_previous = true; break },
                 }
             }
             sleep!(100);
