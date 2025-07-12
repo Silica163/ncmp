@@ -206,23 +206,29 @@ pub fn execute_command(
         },
         Command::Previous     => {
             let mut last_file_idx = 0;
-            if history::get_and_pop(hist, &mut last_file_idx) {
-                if !queue::enqueue_at(q, 0, current_file_idx, files){
+            if !history::get_and_pop(hist, &mut last_file_idx) {
+                println!("Couldn't get previous song: history is empty.");
+                CommandInterrupt::None
+            } else {
+                let can_enqueue_current_file = !queue::enqueue_at(q, 0, current_file_idx, files);
+                if !can_enqueue_current_file {
                     println!("file id {current_file_idx:3} does not exist in fileslist.");
                 }
 
                 // If file in history does not in the list, just ignore previous command.
                 if !queue::enqueue_at(q, 0, last_file_idx, files){
                     println!("file id {last_file_idx:3} does not exist in filelist.");
+
+                    if can_enqueue_current_file {
+                        // If the current file is already added to the queue, but previous file is not in song list,
+                        // remove added file to prevent it from playing again when current file ends.
+                        queue::dequeue_at(q, 0);
+                    }
                     CommandInterrupt::None
                 } else {
                     ps.pause = 1;
                     CommandInterrupt::Previous
                 }
-
-            } else {
-                println!("Couldn't get previous song: history is empty.");
-                CommandInterrupt::None
             }
         },
         Command::ViewHistory  => {
