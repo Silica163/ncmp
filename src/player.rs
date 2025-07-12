@@ -211,12 +211,15 @@ pub fn execute_command(
                     println!("file id {current_file_idx:3} does not exist in fileslist.");
                 }
 
+                // If file in history does not in the list, just ignore previous command.
                 if !queue::enqueue_at(q, 0, last_file_idx, files){
                     println!("file id {last_file_idx:3} does not exist in filelist.");
+                    CommandInterrupt::None
+                } else {
+                    ps.pause = 1;
+                    CommandInterrupt::Previous
                 }
 
-                ps.pause = 1;
-                CommandInterrupt::Previous
             } else {
                 println!("Couldn't get previous song: history is empty.");
                 CommandInterrupt::None

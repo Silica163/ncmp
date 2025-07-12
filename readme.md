@@ -80,7 +80,6 @@ x   -> song info
 played list
 x   -> add last
 x   -> remove last
-    -> WHAT HAPPEN if song is not in song_list?
 
 
 ----- data
