@@ -80,8 +80,6 @@ fn main() {
                 *thread_command_avaliable.lock().unwrap() = true;
                 quit = quit_rx.recv().unwrap();
             }
-
-            try_exit();
         });
     }
 
@@ -89,7 +87,7 @@ fn main() {
     let mut current_file_idx = 0;
     let mut q: VecDeque<usize> = VecDeque::new();
     let mut hist: VecDeque<usize> = VecDeque::new();
-    while player::next(
+    'outer: while player::next(
         &audio_files,
         &mut song, &mut current_file_idx,
         &mut pl,
@@ -97,24 +95,33 @@ fn main() {
     ){
         println!("Playing: {}", song.name.clone());
         ma_wrapper::play(song.path.clone());
+        let mut go_previous = false;
         while !ma_wrapper::is_ended() {
             if *command_avaliable.lock().unwrap() {
-                let mut quit = false;
                 *command_avaliable.lock().unwrap() = false;
-                player::execute_command(
+                match player::execute_command(
                     cmd_rx.recv().unwrap(),
                     &mut player_status,
                     &mut pl,
                     &mut q,
                     &mut hist,
-                    &mut audio_files, current_file_idx,
-                    &mut quit
-                );
-                quit_tx.send(quit).unwrap();
+                    &mut audio_files, current_file_idx
+                ) {
+                    // TODO: merge quit_tx.send(false) together
+                    player::PlayerCommandInterrupt::None    => quit_tx.send(false).unwrap(),
+                    player::PlayerCommandInterrupt::Quit    => {
+                        quit_tx.send(true).unwrap();
+                        break 'outer;
+                    },
+                    player::PlayerCommandInterrupt::Next    => { quit_tx.send(false).unwrap(); break },
+                    player::PlayerCommandInterrupt::Previous=> { quit_tx.send(false).unwrap(); go_previous = true; break },
+                }
             }
             sleep!(100);
         }
-        history::add(&mut hist, current_file_idx);
+        if !go_previous {
+            history::add(&mut hist, current_file_idx);
+        }
     }
     try_exit();
 }

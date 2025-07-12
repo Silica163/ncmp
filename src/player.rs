@@ -136,6 +136,13 @@ pub fn parse_command(user_input: String) -> PlayerCommand {
     }
 }
 
+pub enum PlayerCommandInterrupt {
+    Next,
+    Previous,
+    Quit,
+    None,
+}
+
 pub fn execute_command(
     cmd: PlayerCommand,
     ps: &mut ma_wrapper::PlayerStatus,
@@ -144,15 +151,29 @@ pub fn execute_command(
     hist: &mut VecDeque<usize>,
     files: &mut BTreeMap<usize, filelist::FileInfo>,
     current_file_idx: usize,
-    quit: &mut bool
-) {
+) -> PlayerCommandInterrupt {
     match cmd {
-        PlayerCommand::Play         => ps.pause = 0,
-        PlayerCommand::Pause        => ps.pause = 1,
-        PlayerCommand::TogglePause  => ps.pause = !ps.pause,
-        PlayerCommand::Seek{target_sec}     => { ma_wrapper::seek_to_sec(target_sec); () },
-        PlayerCommand::Info         => info(ps, current_file_idx, files),
-        PlayerCommand::Quit         => *quit = true,
+        PlayerCommand::Play         => {
+            ps.pause = 0;
+            PlayerCommandInterrupt::None
+        },
+        PlayerCommand::Pause        => {
+            ps.pause = 1;
+            PlayerCommandInterrupt::None
+        },
+        PlayerCommand::TogglePause  => {
+            ps.pause = !ps.pause;
+            PlayerCommandInterrupt::None
+        },
+        PlayerCommand::Seek{target_sec} => {
+            ma_wrapper::seek_to_sec(target_sec);
+            PlayerCommandInterrupt::None
+        },
+        PlayerCommand::Info         => {
+            info(ps, current_file_idx, files);
+            PlayerCommandInterrupt::None
+        },
+        PlayerCommand::Quit         => PlayerCommandInterrupt::Quit,
 
         PlayerCommand::QueueAdd { with_index, index, file_idx } => {
             let mut queue_index = q.len();
@@ -162,7 +183,7 @@ pub fn execute_command(
             if !queue::enqueue_at(q, queue_index, file_idx, files) {
                 println!("file id {file_idx:3} does not exist.")
             }
-            ()
+            PlayerCommandInterrupt::None
         },
         PlayerCommand::QueueRemove { with_index, index } => {
             let mut queue_index = 0;
@@ -172,29 +193,63 @@ pub fn execute_command(
             if !queue::dequeue_at(q, queue_index) {
                 println!("couldn't remove queue {queue_index}.")
             }
-            ()
+            PlayerCommandInterrupt::None
         },
-        PlayerCommand::ViewQueue => show(q, files, "queue"),
+        PlayerCommand::ViewQueue => {
+            show(q, files, "queue");
+            PlayerCommandInterrupt::None
+        },
 
         PlayerCommand::Next         => {
             ps.pause = 1;
-            ps.playing = 0;
-            ps.ended = 1;
+            PlayerCommandInterrupt::Next
         },
         PlayerCommand::Previous     => {
-        },
-        PlayerCommand::ViewHistory  => show(hist, files, "history"),
+            let mut last_file_idx = 0;
+            if history::get_and_pop(hist, &mut last_file_idx) {
+                if !queue::enqueue_at(q, 0, current_file_idx, files){
+                    println!("file id {current_file_idx:3} does not exist in fileslist.");
+                }
 
-        PlayerCommand::ViewPlaylist => show(pl, files, "playlist"),
-        PlayerCommand::ViewFiles{full_path} => filelist::show(files, full_path),
+                if !queue::enqueue_at(q, 0, last_file_idx, files){
+                    println!("file id {last_file_idx:3} does not exist in filelist.");
+                }
+
+                ps.pause = 1;
+                PlayerCommandInterrupt::Previous
+            } else {
+                println!("Couldn't get previous song: history is empty.");
+                PlayerCommandInterrupt::None
+            }
+        },
+        PlayerCommand::ViewHistory  => {
+            show(hist, files, "history");
+            PlayerCommandInterrupt::None
+        },
+
+        PlayerCommand::ViewPlaylist => {
+            show(pl, files, "playlist");
+            PlayerCommandInterrupt::None
+        },
+        PlayerCommand::ViewFiles{full_path} => {
+            filelist::show(files, full_path);
+            PlayerCommandInterrupt::None
+        },
         PlayerCommand::RemoveFileById{id}   => {
             filelist::remove(files, id);
             update(pl, files);
             update(q, files);
+            PlayerCommandInterrupt::None
         },
-        PlayerCommand::Unknown{cmd} => println!("Unknown command: {cmd}"),
-        PlayerCommand::Error{msg}   => println!("Error: {msg}"),
-        PlayerCommand::Empty        => {},
+        PlayerCommand::Unknown{cmd} => {
+            println!("Unknown command: {cmd}");
+            PlayerCommandInterrupt::None
+        },
+        PlayerCommand::Error{msg}   => {
+            println!("Error: {msg}");
+            PlayerCommandInterrupt::None
+        },
+        PlayerCommand::Empty        => PlayerCommandInterrupt::None,
     }
 }
 
