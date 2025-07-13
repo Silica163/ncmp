@@ -16,8 +16,9 @@ pub enum Command {
     Quit,
 
     // Queue
-    QueueAdd { with_index: bool, index: usize, file_idx: usize },
+    QueueAdd { file_idxs: Vec<usize> },
     QueueRemove { with_index: bool, index: usize },
+    QueueMove { from: usize, to: usize },
     ViewQueue,
 
     // History
@@ -64,41 +65,75 @@ fn parse_seek_command(cmd: &Vec<&str>) -> Command {
     }
 }
 
-fn parse_queue_command(cmd: &Vec<&str>, is_enqueue: bool) -> Command {
-    let mut file_idx = 0;
+fn parse_dequeue_command(cmd: &Vec<&str>) -> Command {
     let mut queue_idx = 0;
     let mut with_index = false;
     if cmd.len() < 2 {
-        if !is_enqueue {
-            return Command::QueueRemove { with_index, index: queue_idx };
-        }
-        return Command::Error {
-            msg: format!("Expect at least one argument, but nothing is provided."),
-        }
+        return Command::QueueRemove { with_index, index: queue_idx };
     }
-    let args = cmd[1].split(" ").collect::<Vec<&str>>();
 
+    with_index = true;
+    let args = cmd[1].split(" ").collect::<Vec<&str>>();
     match args[0].parse::<usize>() {
-        Ok(n)   => if is_enqueue { file_idx = n } else { queue_idx = n },
+        Ok(n)   => queue_idx = n,
         Err(..) => return Command::Error {
             msg: format!("Expect number but got `{}`", args[0]),
         },
     }
+    return Command::QueueRemove { with_index, index: queue_idx }
+}
 
-    if args.len() > 1 && is_enqueue {
-        match args[1].parse::<usize>() {
-            Ok(n)   => { with_index = true; file_idx = n; },
+fn parse_enqueue_command(cmd: &Vec<&str>) -> Command {
+    if cmd.len() < 2 {
+        return Command::Error {
+            msg: format!("Expect at least one argument, but nothing is provided."),
+        }
+    }
+
+    let mut files: Vec<usize> = vec![];
+    for arg in cmd[1].split(" ") {
+        match arg.parse::<usize>() {
+            Ok(n)   => files.push(n),
             Err(..) => return Command::Error {
-                msg: format!("Expect number but got `{}`", args[1]),
+                msg: format!("Expect number but got `{}`", arg),
             },
         }
     }
 
-    if is_enqueue {
-        return Command::QueueAdd { with_index, index: queue_idx, file_idx }
-    } else {
-        return Command::QueueRemove { with_index, index: queue_idx }
+    Command::QueueAdd{ file_idxs: files }
+}
+
+fn parse_movequeue_command(cmd: &Vec<&str>) -> Command {
+    if cmd.len() != 2 {
+        return Command::Error {
+            msg: format!("Expect 2 argument, but nothing provided."),
+        }
     }
+
+    let from;
+    let to;
+    {
+        let args = cmd[1].split(" ").collect::<Vec<&str>>();
+        if args.len() != 2 {
+            return Command::Error {
+                msg: format!("Expect 2 argument, but {} is given.", args.len()),
+            }
+        }
+        match args[0].parse::<usize>() {
+            Ok(n)   => from = n,
+            Err(..) => return Command::Error {
+                msg: format!("Expect number but got `{}`", args[0]),
+            },
+        }
+        match args[1].parse::<usize>() {
+            Ok(n)   => to = n,
+            Err(..) => return Command::Error {
+                msg: format!("Expect number but got `{}`", args[0]),
+            },
+        }
+    }
+
+    Command::QueueMove{ from, to }
 }
 
 pub fn parse_command(user_input: String) -> Command {
@@ -113,10 +148,12 @@ pub fn parse_command(user_input: String) -> Command {
         "quit"      => Command::Quit,
         "exit"      => Command::Quit,
 
-        "enqueue"   => parse_queue_command(&cmd, true),
-        "enq"       => parse_queue_command(&cmd, true),
-        "dequeue"   => parse_queue_command(&cmd, false),
-        "deq"       => parse_queue_command(&cmd, false),
+        "enqueue"   => parse_enqueue_command(&cmd),
+        "enq"       => parse_enqueue_command(&cmd),
+        "dequeue"   => parse_dequeue_command(&cmd),
+        "deq"       => parse_dequeue_command(&cmd),
+        "movequeue" => parse_movequeue_command(&cmd),
+        "mvq"       => parse_movequeue_command(&cmd),
         "queue"     => Command::ViewQueue,
 
         "next"      => Command::Next,
@@ -175,14 +212,8 @@ pub fn execute_command(
         },
         Command::Quit         => CommandInterrupt::Quit,
 
-        Command::QueueAdd { with_index, index, file_idx } => {
-            let mut queue_index = q.len();
-            if with_index {
-                queue_index = index
-            }
-            if !queue::enqueue_at(q, queue_index, file_idx, files) {
-                println!("file id {file_idx:3} does not exist.")
-            }
+        Command::QueueAdd { file_idxs } => {
+            queue::enqueue_many(q, file_idxs, files);
             CommandInterrupt::None
         },
         Command::QueueRemove { with_index, index } => {
@@ -190,8 +221,25 @@ pub fn execute_command(
             if with_index {
                 queue_index = index;
             }
-            if !queue::dequeue_at(q, queue_index) {
-                println!("couldn't remove queue {queue_index}.")
+            match queue::dequeue_at(q, queue_index) {
+                Some(_) => {},
+                None    => println!("couldn't remove queue {queue_index}."),
+            }
+            CommandInterrupt::None
+        },
+        Command::QueueMove { from, to } => {
+            match Some(q.len()) {
+                Some(0) => println!("could not move from {from} to {to}: queue is empty."),
+                Some(1) => println!("could not move from {from} to {to}: there only one song in queue."),
+                Some(x) if x <= from => println!("could not move from {from}: index must less than queue size."),
+                Some(x) if x <= to   => println!("could not move to {to}: index must less than queue size."),
+                Some(_) => {
+                    match queue::dequeue_at(q, from) {
+                        Some(file_idx) => queue::enqueue_at(q, to, file_idx, files),
+                        None => unreachable!("{}:{}: This should not happen", file!(), line!()),
+                    };
+                },
+                None    => unreachable!("{}:{}: Some(q.len()) == None, something is wrong.", file!(), line!()),
             }
             CommandInterrupt::None
         },
