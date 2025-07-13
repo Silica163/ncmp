@@ -58,9 +58,9 @@ fn parse_seek_command(cmd: &Vec<&str>) -> Command {
         }
     }
     match cmd[1].parse::<i32>() {
-        Ok(target_sec)  => Command::Seek { target_sec },
-        Err(..)         => Command::Error {
-            msg: format!("Expect number but got `{}`", cmd[1]),
+        Ok(target_sec) if target_sec >= 0 => Command::Seek { target_sec },
+        Ok(_) | Err(..) => Command::Error {
+            msg: format!("Expect positive number but got `{}`", cmd[1]),
         },
     }
 }
@@ -77,7 +77,7 @@ fn parse_dequeue_command(cmd: &Vec<&str>) -> Command {
     match args[0].parse::<usize>() {
         Ok(n)   => queue_idx = n,
         Err(..) => return Command::Error {
-            msg: format!("Expect number but got `{}`", args[0]),
+            msg: format!("Expect positive number but got `{}`", args[0]),
         },
     }
     return Command::QueueRemove { with_index, index: queue_idx }
@@ -95,7 +95,7 @@ fn parse_enqueue_command(cmd: &Vec<&str>) -> Command {
         match arg.parse::<usize>() {
             Ok(n)   => files.push(n),
             Err(..) => return Command::Error {
-                msg: format!("Expect number but got `{}`", arg),
+                msg: format!("Expect positive number but got `{}`", arg),
             },
         }
     }
