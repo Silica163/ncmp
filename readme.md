@@ -74,7 +74,6 @@ x   -> pause
 x   -> seek
 x   -> next/prevoius song
 x   -> song info
-    -? volume control
 
 [ ..., previous, current, next, ... ]
 [played        ]          [ queue ][ playlist ]
@@ -94,7 +93,7 @@ Player state
 cmd
 x   -> enqueue
 x   -> remove from queue
-    -> player command
+x   -> player command
 x   -> show queue
 x   -> show playlist
 x   -> show song list
