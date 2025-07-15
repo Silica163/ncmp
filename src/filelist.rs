@@ -37,7 +37,13 @@ pub fn scan_path(path: String, files: &mut Vec<String>) -> Option<()> {
         }
     }
     if path_type.is_file() {
-        files.push(path);
+        match path.as_str().rsplit_once('.') {
+            Some((_, ext)) => match ext {
+                "mp3"|"flac"|"ogg"|"wav" => files.push(path),
+                other => println!("Unsupported extension {other} : `{}`", path),
+            },
+            None => println!("Unknown extension: {path}"),
+        }
     }
     Some(())
 }
