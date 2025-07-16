@@ -30,6 +30,7 @@ pub enum Command {
     ViewPlaylist,
     ViewFiles { full_path: bool },
     RemoveFileById { id: usize },
+    RemoveFileByPattern { pattern: String },
 
     // other
     Unknown { cmd: String },
@@ -49,6 +50,15 @@ fn parse_remove_command(cmd: &Vec<&str>) -> Command {
             msg: format!("Expect number but got `{}`", cmd[1]),
         },
     }
+}
+
+fn parse_remove_pattern_command(cmd: &Vec<&str>) -> Command {
+    if cmd.len() < 2 {
+        return Command::Error {
+            msg: format!("Expect at least one argument, but nothing is provided."),
+        }
+    }
+    Command::RemoveFileByPattern { pattern: cmd[1].to_string() }
 }
 
 fn parse_seek_command(cmd: &Vec<&str>) -> Command {
@@ -168,6 +178,8 @@ pub fn parse_command(user_input: String) -> Command {
         "f"         => Command::ViewFiles { full_path: false},
         "remove"    => parse_remove_command(&cmd),
         "r"         => parse_remove_command(&cmd),
+        "remove_pattern"    => parse_remove_pattern_command(&cmd),
+        "rp"                => parse_remove_pattern_command(&cmd),
         ""          => Command::Empty,
         cmd         => Command::Unknown { cmd: cmd.to_string() } ,
     }
@@ -260,7 +272,7 @@ pub fn execute_command(
             } else {
                 let can_enqueue_current_file = !queue::enqueue_at(q, 0, current_file_idx, files);
                 if !can_enqueue_current_file {
-                    println!("file id {current_file_idx:3} does not exist in fileslist.");
+                    println!("file id {current_file_idx:3} does not exist in filelist.");
                 }
 
                 // If file in history does not in the list, just ignore previous command.
@@ -298,6 +310,11 @@ pub fn execute_command(
             update(q, files);
             CommandInterrupt::None
         },
+        Command::RemoveFileByPattern{pattern} => {
+            filelist::remove_by_pattern(files, pattern);
+            CommandInterrupt::None
+        },
+
         Command::Unknown{cmd} => {
             println!("Unknown command: {cmd}");
             CommandInterrupt::None

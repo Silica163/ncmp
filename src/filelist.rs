@@ -66,3 +66,22 @@ pub fn remove(files: &mut BTreeMap<usize, FileInfo>, id: usize) {
         },
     }
 }
+
+fn path_match(file: FileInfo, pattern: String) -> bool {
+    file.path.contains(&pattern)
+}
+
+pub fn remove_by_pattern(files: &mut BTreeMap<usize, FileInfo>, pattern: String) {
+    let mut to_be_remove: Vec<usize> = vec![];
+    for (file_idx, file) in files.iter() {
+        if path_match(file.clone(), pattern.clone()) {
+            to_be_remove.push(*file_idx);
+        }
+    }
+    for file_idx in to_be_remove {
+        match files.remove(&file_idx) {
+            Some(_) => {},
+            None    => unreachable!("file_idx should exists in filelist"),
+        }
+    }
+}

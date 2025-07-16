@@ -28,6 +28,7 @@ Internal command
 - info
 - f, filelist (show filelist)
 - r, remove (remove file form filelist)
+- rp, remove\_pattern <case sensitive pattern>
 - playlist (show playlist)
 - hist, history
 - next, n
