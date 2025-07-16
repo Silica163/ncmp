@@ -16,24 +16,33 @@ To use this program, download or clone this repo and build it with `make`.
 ./ncmp <audio files or directory>
 ```
 
-Internal command
+## Internal Command
+
+### Player
+
 - play
 - pause
 - p (toggle play/pause)
 - seek <sec> (seek to <sec>)
-- enq, enqueue <song indices>
-- deq, dequeue <queue index?> (remove song from queue by \<index\>, remove first song in queue if index is not provided.)
-- mvq, movequeue \<from\> \<to\>
-- queue (show queue)
-- info
-- f, filelist (show filelist)
-- r, remove (remove file form filelist)
-- rp, remove\_pattern <case sensitive pattern>
 - playlist (show playlist)
 - hist, history
 - next, n
 - previous, prev
 - q, exit, quit
+- info
+
+### Queue
+
+- queue (show queue)
+- enq, enqueue <song indices>
+- deq, dequeue <queue index?> (remove song from queue by \<index\>, remove first song in queue if index is not provided.)
+- mvq, movequeue \<from\> \<to\>
+
+### Files
+
+- f, files (show filelist)
+- r, remove (remove file form filelist)
+- rp, remove\_pattern <case sensitive pattern>
 
 ## Developement plan
 
@@ -52,7 +61,7 @@ song_list <- music_dir
 song_list -> suffle -> playlist
 
 song_list   -> add
-            -> remove by dir
+x           -> remove by dir (pattern)
 
 PLAYLIST
 
