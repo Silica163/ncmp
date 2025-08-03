@@ -33,6 +33,8 @@ pub enum Command {
     RemoveFileByPattern { pattern: String },
 
     // other
+    Help, // TODO: make it easy to change command.
+          // XXX: help <command>?
     Unknown { cmd: String },
     Error { msg: String },
     Empty,
@@ -180,6 +182,8 @@ pub fn parse_command(user_input: String) -> Command {
         "r"         => parse_remove_command(&cmd),
         "remove_pattern"    => parse_remove_pattern_command(&cmd),
         "rp"                => parse_remove_pattern_command(&cmd),
+
+        "help"      => Command::Help,
         ""          => Command::Empty,
         cmd         => Command::Unknown { cmd: cmd.to_string() } ,
     }
@@ -315,6 +319,26 @@ pub fn execute_command(
             CommandInterrupt::None
         },
 
+        Command::Help => {
+            println!("=======================");
+            println!("play, pause, p");
+            println!("seek, info");
+            println!("q, quit, exit");
+            println!("enqueue, enq");
+            println!("dequeue, deq");
+            println!("movequeue, mvq");
+            println!("queue");
+            println!("next, n");
+            println!("previous, prev");
+            println!("history, hist");
+            println!("playlist, queue");
+            println!("files, f");
+            println!("remove, r");
+            println!("remove_pattern, rp");
+            println!("help");
+            println!("=======================");
+            CommandInterrupt::None
+        },
         Command::Unknown{cmd} => {
             println!("Unknown command: {cmd}");
             CommandInterrupt::None
