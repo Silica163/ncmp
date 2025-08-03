@@ -381,7 +381,7 @@ fn show(vdq: &VecDeque<usize>, files: &BTreeMap<usize, filelist::FileInfo>, s: &
     for (index, file_idx) in vdq.iter().enumerate() {
         match files.get(&file_idx) {
             Some(file) => println!("{index:03}: {}", file.name),
-            None => { println!("file id {index:03} is not exists in file list.")},
+            None => { println!("file id {file_idx:03} is not exists in file list.")},
         }
     }
     println!("==============================");
