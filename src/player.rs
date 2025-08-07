@@ -148,6 +148,15 @@ fn parse_movequeue_command(cmd: &Vec<&str>) -> Command {
     Command::QueueMove{ from, to }
 }
 
+// argument_parser: fn (&Vec<&str>) -> Command
+// const static COMMAND_STR: <str, argument_parser> = {
+//     "play": return Command::Play,
+// }
+// const static COMMAND_ALIAS: <str, str> = {
+//      "q": "quit",
+//      "exit": "quit",
+// }
+
 pub fn parse_command(user_input: String) -> Command {
     let cmd: Vec<&str> = user_input.trim_start().splitn(2, " ").collect();
     match cmd[0] {
