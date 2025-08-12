@@ -175,7 +175,7 @@ const COMMAND_STR_FUNCTION: [(&'static str, ArgumentParser); 20] = [
     ("",        |_| Command::Empty),
 ];
 
-const COMMAND_ALIAS: [(&'static str, &'static str); 10] = [
+const COMMAND_ALIAS: [(&'static str, &'static str); 13] = [
     ("q",   "quit"),
     ("exit","quit"),
     ("enq", "enqueue"),
@@ -186,6 +186,9 @@ const COMMAND_ALIAS: [(&'static str, &'static str); 10] = [
     ("hist","history"),
     ("r",   "remove"),
     ("rp",  "remove_pattern"),
+    ("i",   "info"),
+    ("h",   "help"),
+    ("s",   "seek"),
 ];
 
 pub fn parse_command(user_input: String) -> Command {
