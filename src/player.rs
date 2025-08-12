@@ -336,23 +336,11 @@ pub fn execute_command(
         },
 
         Command::Help => {
-            println!("=======================");
-            println!("play, pause, p");
-            println!("seek, info");
-            println!("q, quit, exit");
-            println!("enqueue, enq");
-            println!("dequeue, deq");
-            println!("movequeue, mvq");
-            println!("queue");
-            println!("next, n");
-            println!("previous, prev");
-            println!("history, hist");
-            println!("playlist, queue");
-            println!("files, f");
-            println!("remove, r");
-            println!("remove_pattern, rp");
-            println!("help");
-            println!("=======================");
+            println!("{:=<25}","");
+            for (command, _) in COMMAND_STR_FUNCTION {
+                if command != "" { println!("{command}") }
+            }
+            println!("{:=<25}","");
             CommandInterrupt::None
         },
         Command::Unknown{cmd} => {
