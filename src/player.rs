@@ -196,14 +196,12 @@ pub fn parse_command(user_input: String) -> Command {
     let mut cmd = cmd_raw[0];
     for (alias, real_cmd) in COMMAND_ALIAS {
         if alias == cmd {
-            println!("{cmd} {real_cmd} {alias}");
             cmd = real_cmd;
             break;
         }
     }
     for (cmd_str, run) in COMMAND_STR_FUNCTION {
         if cmd_str == cmd {
-            println!("{cmd} {cmd_raw:?} {cmd_str}");
             return run(&cmd_raw);
         }
     }
