@@ -34,7 +34,7 @@ pub enum Command {
 
     // other
     Help, // XXX: help <command>?
-    Unknown { cmd: String },
+    Unknown { cmd: String, cmd_raw: String },
     Error { msg: String },
     Empty,
 }
@@ -196,16 +196,18 @@ pub fn parse_command(user_input: String) -> Command {
     let mut cmd = cmd_raw[0];
     for (alias, real_cmd) in COMMAND_ALIAS {
         if alias == cmd {
+            println!("{cmd} {real_cmd} {alias}");
             cmd = real_cmd;
             break;
         }
     }
     for (cmd_str, run) in COMMAND_STR_FUNCTION {
         if cmd_str == cmd {
+            println!("{cmd} {cmd_raw:?} {cmd_str}");
             return run(&cmd_raw);
         }
     }
-    Command::Unknown { cmd: cmd_raw[0].to_string() }
+    Command::Unknown { cmd: cmd.to_string(), cmd_raw: cmd_raw[0].to_string() }
 }
 
 pub enum CommandInterrupt {
@@ -346,8 +348,17 @@ pub fn execute_command(
             println!("{:=<25}","");
             CommandInterrupt::None
         },
-        Command::Unknown{cmd} => {
-            println!("Unknown command: {cmd}");
+        Command::Unknown{cmd, cmd_raw} => {
+            if cmd == cmd_raw {
+                println!("Unknown command: {cmd}");
+            } else {
+                for (cmd_alias, cmd_real) in COMMAND_ALIAS {
+                    if cmd_alias == cmd_raw {
+                        println!("Unknown command: \"{cmd_alias}\", which is alias for non existing \"{cmd_real}\" command.");
+                        break;
+                    }
+                }
+            }
             CommandInterrupt::None
         },
         Command::Error{msg}   => {
