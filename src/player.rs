@@ -33,8 +33,7 @@ pub enum Command {
     RemoveFileByPattern { pattern: String },
 
     // other
-    Help, // TODO: make it easy to change command.
-          // XXX: help <command>?
+    Help, // XXX: help <command>?
     Unknown { cmd: String },
     Error { msg: String },
     Empty,
@@ -148,54 +147,62 @@ fn parse_movequeue_command(cmd: &Vec<&str>) -> Command {
     Command::QueueMove{ from, to }
 }
 
-// argument_parser: fn (&Vec<&str>) -> Command
-// const static COMMAND_STR: <str, argument_parser> = {
-//     "play": return Command::Play,
-// }
-// const static COMMAND_ALIAS: <str, str> = {
-//      "q": "quit",
-//      "exit": "quit",
-// }
+type ArgumentParser = fn (&Vec<&str>) -> Command;
+const COMMAND_STR_FUNCTION: [(&'static str, ArgumentParser); 20] = [
+    ("play",    |_| Command::Play),
+    ("pause",   |_| Command::Pause),
+    ("p",       |_| Command::TogglePause),
+    ("seek",    parse_seek_command),
+    ("info",    |_| Command::Info),
+    ("quit",    |_| Command::Quit),
+    ("enqueue",     parse_enqueue_command),
+    ("dequeue",     parse_dequeue_command),
+    ("movequeue",   parse_movequeue_command),
+    ("queue",       |_| Command::ViewQueue),
+
+    ("next",        |_| Command::Next),
+    ("previous",    |_| Command::Previous),
+    ("history",     |_| Command::ViewHistory),
+
+    ("playlist",    |_| Command::ViewPlaylist),
+    ("files",       |_| Command::ViewFiles { full_path: true }),
+    ("f",           |_| Command::ViewFiles { full_path: false }), // TODO: move this to alias
+    ("remove",          parse_remove_command),
+    ("remove_pattern",  parse_remove_pattern_command),
+    ("help",        |_| Command::Help),
+
+
+    ("",        |_| Command::Empty),
+];
+
+const COMMAND_ALIAS: [(&'static str, &'static str); 10] = [
+    ("q",   "quit"),
+    ("exit","quit"),
+    ("enq", "enqueue"),
+    ("deq", "dequeue"),
+    ("mvq", "movequeue"),
+    ("n",   "next"),
+    ("prev","previous"),
+    ("hist","history"),
+    ("r",   "remove"),
+    ("rp",  "remove_pattern"),
+];
 
 pub fn parse_command(user_input: String) -> Command {
-    let cmd: Vec<&str> = user_input.trim_start().splitn(2, " ").collect();
-    match cmd[0] {
-        "play"      => Command::Play,
-        "pause"     => Command::Pause,
-        "p"         => Command::TogglePause,
-        "seek"      => parse_seek_command(&cmd),
-        "info"      => Command::Info,
-        "q"         => Command::Quit,
-        "quit"      => Command::Quit,
-        "exit"      => Command::Quit,
-
-        "enqueue"   => parse_enqueue_command(&cmd),
-        "enq"       => parse_enqueue_command(&cmd),
-        "dequeue"   => parse_dequeue_command(&cmd),
-        "deq"       => parse_dequeue_command(&cmd),
-        "movequeue" => parse_movequeue_command(&cmd),
-        "mvq"       => parse_movequeue_command(&cmd),
-        "queue"     => Command::ViewQueue,
-
-        "next"      => Command::Next,
-        "n"         => Command::Next,
-        "previous"  => Command::Previous,
-        "prev"      => Command::Previous,
-        "history"   => Command::ViewHistory,
-        "hist"      => Command::ViewHistory,
-
-        "playlist"  => Command::ViewPlaylist,
-        "files"     => Command::ViewFiles { full_path: true },
-        "f"         => Command::ViewFiles { full_path: false},
-        "remove"    => parse_remove_command(&cmd),
-        "r"         => parse_remove_command(&cmd),
-        "remove_pattern"    => parse_remove_pattern_command(&cmd),
-        "rp"                => parse_remove_pattern_command(&cmd),
-
-        "help"      => Command::Help,
-        ""          => Command::Empty,
-        cmd         => Command::Unknown { cmd: cmd.to_string() } ,
+    let cmd_raw: Vec<&str> = user_input.trim_start().splitn(2, " ").collect();
+    let mut cmd = cmd_raw[0];
+    for (alias, real_cmd) in COMMAND_ALIAS {
+        if alias == cmd {
+            cmd = real_cmd;
+            break;
+        }
     }
+    for (cmd_str, run) in COMMAND_STR_FUNCTION {
+        if cmd_str == cmd {
+            return run(&cmd_raw);
+        }
+    }
+    Command::Unknown { cmd: cmd_raw[0].to_string() }
 }
 
 pub enum CommandInterrupt {
